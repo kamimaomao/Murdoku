@@ -62,30 +62,141 @@
 - Create: `src/styles/tokens.css`
 - Create: `src/styles/global.css`
 
-- [ ] **Step 1: Initialize Vite React TypeScript files**
+- [ ] **Step 1: Create Vite React TypeScript files manually**
 
-Run:
+Create `package.json`:
 
-```bash
-npm create vite@latest . -- --template react-ts
+```json
+{
+  "name": "murdoku-mobile",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "smoke": "playwright test tests/smoke/mobile.spec.ts"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "typescript": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "latest",
+    "@testing-library/react": "latest",
+    "@testing-library/user-event": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "jsdom": "latest",
+    "playwright": "latest",
+    "vitest": "latest"
+  }
+}
 ```
 
-Expected: Vite writes `package.json`, `index.html`, `src/`, and TypeScript config files.
+Create `index.html`:
 
-- [ ] **Step 2: Install test and browser tooling**
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0e0b13" />
+    <title>Murdoku Mobile</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+```
+
+Create `tsconfig.json`:
+
+```json
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}
+```
+
+Create `tsconfig.app.json`:
+
+```json
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true
+  },
+  "include": ["src", "tests"]
+}
+```
+
+Create `tsconfig.node.json`:
+
+```json
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": ["vite.config.ts", "playwright.config.ts"]
+}
+```
+
+- [ ] **Step 2: Install dependencies**
 
 Run:
 
 ```bash
 npm install
-npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom playwright
 ```
 
 Expected: dependencies install without errors and `package-lock.json` is created.
 
-- [ ] **Step 3: Replace scripts in `package.json`**
+- [ ] **Step 3: Confirm scripts in `package.json`**
 
-Use these scripts:
+Confirm these scripts exist:
 
 ```json
 {
