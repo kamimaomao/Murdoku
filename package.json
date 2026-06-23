@@ -9,7 +9,7 @@
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
-    "smoke": "playwright test tests/smoke/mobile.spec.ts"
+    "smoke": "node tests/smoke/mobile-smoke.mjs"
   },
   "dependencies": {
     "react": "latest",

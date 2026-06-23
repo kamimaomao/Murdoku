@@ -41,6 +41,11 @@ button:disabled {
   gap: 12px;
 }
 
+.case-header > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
 .brand,
 .eyebrow {
   margin: 0 0 4px;
@@ -59,8 +64,9 @@ h2 {
 
 h1 {
   color: var(--text);
-  font-size: 26px;
+  font-size: 24px;
   line-height: 1.05;
+  overflow-wrap: anywhere;
 }
 
 h2 {
