@@ -1,5 +1,5 @@
 import { type CSSProperties, useMemo, useState } from 'react';
-import { murdokuLogo, objectAssetFor } from './assets/murdokuAssets';
+import { murdokuLogo, objectAssetFor, roomVisualFor } from './assets/murdokuAssets';
 import { cases, casesById } from './data/cases';
 import { applyCellAction, createInitialGameState, selectSuspect, setTool, undo } from './game/board';
 import { loadProgress, saveProgress, type ProgressState } from './game/storage';
@@ -138,11 +138,20 @@ export default function App() {
           const suspect = suspectForCell(currentCase, game.board, cell.id);
           const marked = game.board.marks[cell.id];
           const objectAsset = objectAssetFor(cell.object);
+          const roomVisual = roomVisualFor(cell.room);
+          const cellClass = [
+            'board-cell',
+            roomVisual.className,
+            objectAsset ? 'has-object' : '',
+            suspect ? 'occupied' : marked ? 'marked' : ''
+          ]
+            .filter(Boolean)
+            .join(' ');
 
           return (
             <button
               aria-label={cellLabel(cell, suspect, marked)}
-              className={suspect ? 'board-cell occupied' : marked ? 'board-cell marked' : 'board-cell'}
+              className={cellClass}
               key={cell.id}
               onClick={() => updateGame(applyCellAction(game, cell.id))}
               style={{ '--accent': suspect?.accent } as CSSProperties}

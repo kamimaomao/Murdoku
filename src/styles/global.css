@@ -177,26 +177,80 @@ h2 {
   padding: 3px;
   border: 1px solid rgba(83, 58, 34, 0.34);
   border-radius: 4px;
-  background: #d9c38c;
+  background: var(--cell-base, #d9c38c);
   color: #3b281d;
+  isolation: isolate;
   overflow: hidden;
 }
 
-.board-cell:nth-child(3n + 1) {
-  background: #c8d0a0;
+.board-cell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--cell-pattern, linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(77, 52, 31, 0.08)));
+  opacity: 0.72;
+  pointer-events: none;
 }
 
-.board-cell:nth-child(4n + 2) {
-  background: #d5b983;
+.room-default {
+  --cell-base: #d9c38c;
 }
 
-.board-cell:nth-child(5n + 3) {
-  background: #b9c1c2;
+.room-desert {
+  --cell-base: #d7bd7d;
+  --cell-pattern:
+    radial-gradient(circle at 22% 28%, rgba(112, 80, 43, 0.2) 0 1px, transparent 2px),
+    radial-gradient(circle at 74% 67%, rgba(255, 237, 179, 0.42) 0 1px, transparent 2px);
+}
+
+.room-wood {
+  --cell-base: #c69b61;
+  --cell-pattern:
+    linear-gradient(90deg, rgba(66, 42, 26, 0.22) 0 1px, transparent 1px 33%),
+    linear-gradient(0deg, rgba(255, 237, 178, 0.18), rgba(84, 50, 28, 0.1));
+}
+
+.room-grass {
+  --cell-base: #b7c88b;
+  --cell-pattern:
+    linear-gradient(115deg, transparent 0 42%, rgba(69, 105, 61, 0.22) 43% 46%, transparent 47%),
+    radial-gradient(circle at 30% 70%, rgba(245, 230, 163, 0.24) 0 2px, transparent 3px);
+}
+
+.room-water {
+  --cell-base: #91b7bd;
+  --cell-pattern:
+    radial-gradient(ellipse at 32% 36%, rgba(255, 255, 255, 0.34) 0 14%, transparent 15%),
+    linear-gradient(145deg, rgba(49, 89, 99, 0.2), rgba(255, 255, 255, 0.14));
+}
+
+.room-path {
+  --cell-base: #b5a58d;
+  --cell-pattern:
+    radial-gradient(circle at 20% 28%, rgba(74, 65, 55, 0.2) 0 2px, transparent 3px),
+    radial-gradient(circle at 76% 68%, rgba(255, 244, 206, 0.32) 0 2px, transparent 3px);
+}
+
+.room-canvas {
+  --cell-base: #ceb586;
+  --cell-pattern:
+    linear-gradient(45deg, rgba(98, 65, 43, 0.16) 0 1px, transparent 1px 8px),
+    linear-gradient(-45deg, rgba(255, 244, 207, 0.2) 0 1px, transparent 1px 8px);
+}
+
+.room-carpet {
+  --cell-base: #b78372;
+  --cell-pattern:
+    linear-gradient(90deg, rgba(104, 35, 38, 0.22) 0 2px, transparent 2px 8px),
+    linear-gradient(0deg, rgba(247, 219, 165, 0.2) 0 2px, transparent 2px 8px);
 }
 
 .board-cell.occupied {
   outline: 2px solid var(--accent, var(--accent-2));
-  background: #f0e4bd;
+  background:
+    linear-gradient(rgba(255, 244, 204, 0.6), rgba(255, 244, 204, 0.6)),
+    var(--cell-base, #f0e4bd);
 }
 
 .board-cell.marked {
@@ -215,6 +269,11 @@ h2 {
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
+  z-index: 1;
+}
+
+.board-cell.has-object .cell-room {
+  opacity: 0.12;
 }
 
 .cell-object {
@@ -224,13 +283,14 @@ h2 {
 
 .cell-object-art {
   position: absolute;
-  right: 2px;
-  bottom: 2px;
-  max-width: 58%;
-  max-height: 58%;
+  inset: auto 50% 2px auto;
+  z-index: 1;
+  max-width: 74%;
+  max-height: 72%;
   object-fit: contain;
   pointer-events: none;
   filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.38)) drop-shadow(0 2px 2px rgba(40, 28, 21, 0.26));
+  transform: translateX(50%);
 }
 
 .cell-suspect,
@@ -249,6 +309,7 @@ h2 {
   line-height: 1;
   place-items: center;
   transform: translate(-50%, -50%);
+  z-index: 2;
 }
 
 .cell-mark {
