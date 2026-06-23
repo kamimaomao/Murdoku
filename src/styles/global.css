@@ -56,6 +56,13 @@ button:disabled {
   text-transform: uppercase;
 }
 
+.brand-logo {
+  display: block;
+  width: 96px;
+  height: auto;
+  margin: 0 0 4px;
+}
+
 h1,
 h2 {
   margin: 0;
@@ -213,6 +220,17 @@ h2 {
 .cell-object {
   align-self: end;
   color: rgba(40, 28, 21, 0.86);
+}
+
+.cell-object-art {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  max-width: 58%;
+  max-height: 58%;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.38)) drop-shadow(0 2px 2px rgba(40, 28, 21, 0.26));
 }
 
 .cell-suspect,

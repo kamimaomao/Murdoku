@@ -1,4 +1,5 @@
 import { type CSSProperties, useMemo, useState } from 'react';
+import { murdokuLogo, objectAssetFor } from './assets/murdokuAssets';
 import { cases, casesById } from './data/cases';
 import { applyCellAction, createInitialGameState, selectSuspect, setTool, undo } from './game/board';
 import { loadProgress, saveProgress, type ProgressState } from './game/storage';
@@ -97,7 +98,7 @@ export default function App() {
     <main className="app-shell" aria-label="Murdoku mobile app">
       <header className="case-header">
         <div>
-          <p className="brand">Murdoku</p>
+          <img className="brand-logo" src={murdokuLogo} alt="Murdoku" />
           <h1>{currentCase.title}</h1>
         </div>
         <div className="case-meta" aria-label="case progress">
@@ -134,6 +135,7 @@ export default function App() {
         {currentCase.cells.map((cell) => {
           const suspect = suspectForCell(currentCase, game.board, cell.id);
           const marked = game.board.marks[cell.id];
+          const objectAsset = objectAssetFor(cell.object);
 
           return (
             <button
@@ -145,7 +147,11 @@ export default function App() {
               type="button"
             >
               <span className="cell-room">{cell.room}</span>
-              {cell.object ? <span className="cell-object">{cell.object}</span> : null}
+              {objectAsset ? (
+                <img className="cell-object-art" src={objectAsset} alt={cell.object} />
+              ) : cell.object ? (
+                <span className="cell-object">{cell.object}</span>
+              ) : null}
               {marked ? <span className="cell-mark">X</span> : null}
               {suspect ? (
                 <span className="cell-suspect" aria-hidden="true">

@@ -31,6 +31,13 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: /^row 5 column 6$/i })).toBeInTheDocument();
   });
 
+  it('renders licensed reference assets when available', () => {
+    render(<App />);
+
+    expect(screen.getByAltText('Murdoku')).toHaveAttribute('src', '/murdoku-assets/murdoku_logo_white.png');
+    expect(screen.getByAltText('Horse')).toHaveAttribute('src', '/murdoku-assets/obj_horse.svg');
+  });
+
   it('closes the case when all suspects match the solution', async () => {
     const user = userEvent.setup();
     const firstCase = cases[0];
