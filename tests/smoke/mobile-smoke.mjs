@@ -9,10 +9,10 @@ const page = await browser.newPage({
 
 try {
   await page.goto(targetUrl, { waitUntil: 'load' });
-  await page.getByRole('heading', { name: 'A Horse With No Name' }).waitFor();
+  await page.getByRole('heading', { name: '无名之马' }).waitFor();
   await page.getByRole('button', { name: 'Aldous' }).click();
-  await page.getByRole('button', { name: 'Row 5 column 6' }).click();
-  await page.getByRole('button', { name: 'Row 5 column 6, Aldous' }).waitFor();
+  await page.getByRole('button', { name: '第 5 行第 6 列' }).click();
+  await page.getByRole('button', { name: '第 5 行第 6 列，Aldous' }).waitFor();
   await page.screenshot({ path: 'tests/smoke/mobile-smoke.png', fullPage: false });
 } finally {
   await browser.close();

@@ -5,14 +5,18 @@ import { applyCellAction, createInitialGameState, selectSuspect, setTool, undo }
 import { loadProgress, saveProgress, type ProgressState } from './game/storage';
 import type { BoardState, CaseDefinition, CellDefinition, GameState, Suspect, Tool, ValidationResult } from './game/types';
 import { validateBoard } from './game/validation';
-
-const difficultyLabels: Record<CaseDefinition['difficulty'], string> = {
-  'very-easy': 'Very easy',
-  easy: 'Easy',
-  medium: 'Medium',
-  hard: 'Hard',
-  expert: 'Expert'
-};
+import {
+  caseIntro,
+  caseTitle,
+  cellLabel as zhCellLabel,
+  difficultyLabels,
+  issueText as zhIssueText,
+  objectName,
+  roomName,
+  suspectClues,
+  toolLabels,
+  uiText
+} from './i18n/zhHans';
 
 function boardKey(board: BoardState): string {
   return JSON.stringify(board);
@@ -24,16 +28,11 @@ function suspectForCell(caseDef: CaseDefinition, board: BoardState, cellId: Cell
 }
 
 function cellLabel(cell: CellDefinition, suspect: Suspect | undefined, marked: boolean | undefined): string {
-  const parts = [`Row ${cell.row + 1} column ${cell.column + 1}`];
-  if (suspect) parts.push(suspect.name);
-  if (marked) parts.push('marked');
-  return parts.join(', ');
+  return zhCellLabel(cell.row, cell.column, suspect?.name, marked);
 }
 
 function toolLabel(tool: Tool): string {
-  if (tool === 'x') return 'Mark unavailable';
-  if (tool === 'erase') return 'Erase';
-  return 'Place';
+  return toolLabels[tool];
 }
 
 function firstSavedGame(progress: ProgressState): GameState {
@@ -90,18 +89,21 @@ export default function App() {
   }
 
   function issueText(result: ValidationResult): string {
-    if (result.solved) return `Case closed. ${currentCase.suspects.find((suspect) => suspect.id === currentCase.murdererId)?.name} is the murderer.`;
-    return result.issues[0]?.message ?? 'The evidence does not support this accusation.';
+    if (result.solved) {
+      const murderer = currentCase.suspects.find((suspect) => suspect.id === currentCase.murdererId)?.name;
+      return `${uiText.caseClosed}${uiText.murdererPrefix} ${murderer}。`;
+    }
+    return zhIssueText(result.issues[0]);
   }
 
   return (
-    <main className="app-shell" aria-label="Murdoku mobile app">
+    <main className="app-shell" aria-label={uiText.appLabel}>
       <header className="case-header">
         <div>
           <img className="brand-logo" src={murdokuLogo} alt="Murdoku" />
-          <h1>{currentCase.title}</h1>
+          <h1>{caseTitle(currentCase)}</h1>
         </div>
-        <div className="case-meta" aria-label="case progress">
+        <div className="case-meta" aria-label={uiText.caseProgress}>
           <span>{difficultyLabels[currentCase.difficulty]}</span>
           <span>
             {placedCount}/{currentCase.suspects.length}
@@ -109,7 +111,7 @@ export default function App() {
         </div>
       </header>
 
-      <section className="case-strip" aria-label="cases">
+      <section className="case-strip" aria-label={uiText.cases}>
         {cases.map((caseDef, index) => (
           <button
             className={caseDef.id === currentCase.id ? 'case-chip active' : 'case-chip'}
@@ -118,18 +120,18 @@ export default function App() {
             type="button"
           >
             <span>{index + 1}</span>
-            {progress.cases[caseDef.id]?.completed ? 'Closed' : difficultyLabels[caseDef.difficulty]}
+            {progress.cases[caseDef.id]?.completed ? uiText.closed : difficultyLabels[caseDef.difficulty]}
           </button>
         ))}
       </section>
 
-      <section className="briefing" aria-label="case briefing">
-        <p>{currentCase.intro}</p>
+      <section className="briefing" aria-label={uiText.briefing}>
+        <p>{caseIntro(currentCase)}</p>
       </section>
 
       <section
         className="board"
-        aria-label="crime board"
+        aria-label={uiText.board}
         style={{ gridTemplateColumns: `repeat(${currentCase.size.columns}, minmax(0, 1fr))` }}
       >
         {currentCase.cells.map((cell) => {
@@ -146,11 +148,11 @@ export default function App() {
               style={{ '--accent': suspect?.accent } as CSSProperties}
               type="button"
             >
-              <span className="cell-room">{cell.room}</span>
+              <span className="cell-room">{roomName(cell.room)}</span>
               {objectAsset ? (
-                <img className="cell-object-art" src={objectAsset} alt={cell.object} />
+                <img className="cell-object-art" src={objectAsset} alt={objectName(cell.object)} />
               ) : cell.object ? (
-                <span className="cell-object">{cell.object}</span>
+                <span className="cell-object">{objectName(cell.object)}</span>
               ) : null}
               {marked ? <span className="cell-mark">X</span> : null}
               {suspect ? (
@@ -163,24 +165,24 @@ export default function App() {
         })}
       </section>
 
-      <section className="clue-panel" aria-label="selected suspect clues">
+      <section className="clue-panel" aria-label={uiText.clues}>
         <div className="selected-row">
           <div className="avatar" style={{ '--accent': selectedSuspect?.accent } as CSSProperties}>
             {selectedSuspect ? selectedSuspect.name.slice(0, 1) : '?'}
           </div>
           <div>
-            <p className="eyebrow">{selectedSuspect ? 'Selected suspect' : 'No suspect selected'}</p>
-            <h2>{selectedSuspect?.name ?? 'Choose a suspect'}</h2>
+            <p className="eyebrow">{selectedSuspect ? uiText.selectedSuspect : uiText.noSuspectSelected}</p>
+            <h2>{selectedSuspect?.name ?? uiText.chooseSuspect}</h2>
           </div>
         </div>
         <ul>
-          {(selectedSuspect?.clues ?? ['Select a suspect, then tap a tile.']).map((clue) => (
+          {(selectedSuspect ? suspectClues(currentCase.id, selectedSuspect) : [uiText.chooseHint]).map((clue) => (
             <li key={clue}>{clue}</li>
           ))}
         </ul>
       </section>
 
-      <section className="suspect-dock" aria-label="suspects">
+      <section className="suspect-dock" aria-label={uiText.suspects}>
         {currentCase.suspects.map((suspect) => {
           const isSelected = suspect.id === game.selectedSuspectId;
           const isPlaced = Object.values(game.board.placements).includes(suspect.id);
@@ -197,7 +199,7 @@ export default function App() {
                 {suspect.name.slice(0, 1)}
               </span>
               <span>{suspect.name}</span>
-              {isPlaced ? <span className="placed-dot" aria-label="placed" /> : null}
+              {isPlaced ? <span className="placed-dot" aria-label={uiText.placed} /> : null}
             </button>
           );
         })}
@@ -216,15 +218,15 @@ export default function App() {
           </button>
         ))}
         <button className="tool-button" disabled={game.undoStack.length === 0} onClick={() => updateGame(undo(game))} type="button">
-          Undo
+          {uiText.undo}
         </button>
         <button className="accuse-button" onClick={submitAccusation} type="button">
-          Accuse
+          {uiText.accuse}
         </button>
       </footer>
 
       <section className={validation?.solved || completed ? 'result solved' : 'result'} role="status" aria-live="polite">
-        {validation ? issueText(validation) : completed ? 'Case closed.' : `${toolLabel(game.activeTool)} mode`}
+        {validation ? issueText(validation) : completed ? uiText.caseClosed : `${toolLabel(game.activeTool)}${uiText.modeSuffix}`}
       </section>
     </main>
   );
