@@ -20,35 +20,33 @@ export function validateBoard(caseDef: CaseDefinition, board: BoardState): Valid
     }
   }
 
-  for (const suspectId of requiredSuspects) {
-    const suspectCells = placedEntries
-      .filter(([, placedSuspectId]) => placedSuspectId === suspectId)
-      .map(([cellId]) => cellsById[cellId]);
+  const usedRows = new Map<number, SuspectId>();
+  const usedColumns = new Map<number, SuspectId>();
 
-    const rows = new Set<number>();
-    const columns = new Set<number>();
+  for (const [cellId, suspectId] of placedEntries) {
+    const cell = cellsById[cellId];
+    if (!cell) continue;
 
-    for (const cell of suspectCells) {
-      if (!cell) continue;
-      if (rows.has(cell.row)) {
-        issues.push({
-          type: 'duplicate-row',
-          row: cell.row,
-          suspectId,
-          message: 'A suspect appears more than once in the same row.'
-        });
-      }
-      if (columns.has(cell.column)) {
-        issues.push({
-          type: 'duplicate-column',
-          column: cell.column,
-          suspectId,
-          message: 'A suspect appears more than once in the same column.'
-        });
-      }
-      rows.add(cell.row);
-      columns.add(cell.column);
+    if (usedRows.has(cell.row)) {
+      issues.push({
+        type: 'duplicate-row',
+        row: cell.row,
+        suspectId,
+        message: 'Only one suspect can occupy each row.'
+      });
     }
+
+    if (usedColumns.has(cell.column)) {
+      issues.push({
+        type: 'duplicate-column',
+        column: cell.column,
+        suspectId,
+        message: 'Only one suspect can occupy each column.'
+      });
+    }
+
+    usedRows.set(cell.row, suspectId);
+    usedColumns.set(cell.column, suspectId);
   }
 
   if (issues.length > 0) return { solved: false, issues };

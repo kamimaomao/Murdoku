@@ -44,9 +44,29 @@ describe('validateBoard', () => {
     expect(result.issues.some((issue) => issue.type === 'duplicate-row')).toBe(true);
   });
 
+  it('reports two different suspects in the same row', () => {
+    const result = validateBoard(testCase, {
+      placements: { '0-0': 'ada', '0-1': 'victim' },
+      marks: {}
+    });
+
+    expect(result.solved).toBe(false);
+    expect(result.issues.some((issue) => issue.type === 'duplicate-row')).toBe(true);
+  });
+
   it('reports duplicate suspect in the same column', () => {
     const result = validateBoard(testCase, {
       placements: { '0-0': 'ada', '1-0': 'ada', '1-1': 'victim' },
+      marks: {}
+    });
+
+    expect(result.solved).toBe(false);
+    expect(result.issues.some((issue) => issue.type === 'duplicate-column')).toBe(true);
+  });
+
+  it('reports two different suspects in the same column', () => {
+    const result = validateBoard(testCase, {
+      placements: { '0-0': 'ada', '1-0': 'victim' },
       marks: {}
     });
 
@@ -66,7 +86,7 @@ describe('validateBoard', () => {
 
   it('reports wrong placement without revealing the correct cell', () => {
     const result = validateBoard(testCase, {
-      placements: { '0-1': 'ada', '1-1': 'victim' },
+      placements: { '1-0': 'ada', '0-1': 'victim' },
       marks: {}
     });
 
