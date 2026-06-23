@@ -32,6 +32,11 @@ export function applyCellAction(state: GameState, cellId: CellId): GameState {
 
   if (state.activeTool === 'place') {
     if (!state.selectedSuspectId) return state;
+    for (const [placedCellId, suspectId] of Object.entries(board.placements)) {
+      if (suspectId === state.selectedSuspectId) {
+        delete board.placements[placedCellId as CellId];
+      }
+    }
     board.placements[cellId] = state.selectedSuspectId;
     delete board.marks[cellId];
   }

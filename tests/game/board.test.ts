@@ -14,6 +14,20 @@ describe('board state', () => {
     expect(next.undoStack).toHaveLength(2);
   });
 
+  it('moves an already placed suspect instead of duplicating it', () => {
+    const state = {
+      ...createInitialGameState('case-01'),
+      activeTool: 'place' as const,
+      selectedSuspectId: 'ada'
+    };
+
+    const first = applyCellAction(state, '0-0');
+    const next = applyCellAction(first, '1-1');
+
+    expect(next.board.placements['0-0']).toBeUndefined();
+    expect(next.board.placements['1-1']).toBe('ada');
+  });
+
   it('marks X and clears an existing placement', () => {
     const state = {
       ...createInitialGameState('case-01'),

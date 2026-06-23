@@ -44,6 +44,33 @@ describe('validateBoard', () => {
     expect(result.issues.some((issue) => issue.type === 'duplicate-row')).toBe(true);
   });
 
+  it('reports duplicate suspect across different rows and columns', () => {
+    const result = validateBoard(
+      {
+        ...testCase,
+        size: { rows: 3, columns: 3 },
+        cells: [
+          { id: '0-0', row: 0, column: 0 },
+          { id: '0-1', row: 0, column: 1 },
+          { id: '0-2', row: 0, column: 2 },
+          { id: '1-0', row: 1, column: 0 },
+          { id: '1-1', row: 1, column: 1 },
+          { id: '1-2', row: 1, column: 2 },
+          { id: '2-0', row: 2, column: 0 },
+          { id: '2-1', row: 2, column: 1 },
+          { id: '2-2', row: 2, column: 2 }
+        ]
+      },
+      {
+        placements: { '0-0': 'ada', '1-1': 'victim', '2-2': 'ada' },
+        marks: {}
+      }
+    );
+
+    expect(result.solved).toBe(false);
+    expect(result.issues.some((issue) => issue.type === 'duplicate-suspect')).toBe(true);
+  });
+
   it('reports two different suspects in the same row', () => {
     const result = validateBoard(testCase, {
       placements: { '0-0': 'ada', '0-1': 'victim' },

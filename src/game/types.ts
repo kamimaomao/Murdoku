@@ -60,6 +60,7 @@ export interface GameState {
 
 export type ValidationIssue =
   | { type: 'incomplete'; message: string }
+  | { type: 'duplicate-suspect'; suspectId: SuspectId; message: string }
   | { type: 'duplicate-row'; row: number; suspectId: SuspectId; message: string }
   | { type: 'duplicate-column'; column: number; suspectId: SuspectId; message: string }
   | { type: 'wrong-placement'; suspectId: SuspectId; message: string };

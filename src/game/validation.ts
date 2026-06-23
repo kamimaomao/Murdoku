@@ -22,10 +22,19 @@ export function validateBoard(caseDef: CaseDefinition, board: BoardState): Valid
 
   const usedRows = new Map<number, SuspectId>();
   const usedColumns = new Map<number, SuspectId>();
+  const usedSuspects = new Set<SuspectId>();
 
   for (const [cellId, suspectId] of placedEntries) {
     const cell = cellsById[cellId];
     if (!cell) continue;
+
+    if (usedSuspects.has(suspectId)) {
+      issues.push({
+        type: 'duplicate-suspect',
+        suspectId,
+        message: 'Each suspect can only be placed once.'
+      });
+    }
 
     if (usedRows.has(cell.row)) {
       issues.push({
@@ -47,6 +56,7 @@ export function validateBoard(caseDef: CaseDefinition, board: BoardState): Valid
 
     usedRows.set(cell.row, suspectId);
     usedColumns.set(cell.column, suspectId);
+    usedSuspects.add(suspectId);
   }
 
   if (issues.length > 0) return { solved: false, issues };
