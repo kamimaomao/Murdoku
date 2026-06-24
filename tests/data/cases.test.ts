@@ -2,6 +2,18 @@ import { describe, expect, it } from 'vitest';
 import { cases } from '../../src/data/cases';
 import { validateCaseData } from '../../src/data/cases/validateCases';
 import { validateBoard } from '../../src/game/validation';
+import { objects, objectName, roomName, rooms, suspectClues } from '../../src/i18n/zhHans';
+
+function matchedLabels(text: string, labels: string[]): string[] {
+  let remaining = text;
+  return labels
+    .sort((a, b) => b.length - a.length)
+    .filter((label) => {
+      if (!remaining.includes(label)) return false;
+      remaining = remaining.replace(label, '');
+      return true;
+    });
+}
 
 describe('case data', () => {
   it('contains exactly 10 first-release cases', () => {
@@ -50,5 +62,55 @@ describe('case data', () => {
     expect(cases.slice(0, 4).map((caseDef) => caseDef.intro).join(' ')).not.toMatch(/outlaw/i);
     expect(cases[4].intro).toMatch(/outlaw/i);
     expect(cases[4].intro).toMatch(/may or may not be the murderer/i);
+  });
+
+  it('keeps localized direct clue text aligned with each solution cell', () => {
+    const failures: string[] = [];
+    const roomLabels = [...new Set(Object.values(rooms))];
+    const objectLabels = [...new Set(Object.values(objects))];
+
+    for (const caseDef of cases) {
+      for (const suspect of caseDef.suspects) {
+        const placement = caseDef.solution.find((candidate) => candidate.suspectId === suspect.id);
+        const cell = caseDef.cells.find((candidate) => candidate.id === placement?.cellId);
+
+        expect(placement).toBeDefined();
+        expect(cell).toBeDefined();
+
+        for (const clue of suspectClues(caseDef.id, suspect)) {
+          for (const rowMatch of clue.matchAll(/第\s*(\d+)\s*行/g)) {
+            const expected = cell!.row + 1;
+            const actual = Number(rowMatch[1]);
+            if (actual !== expected) failures.push(`${caseDef.id} ${suspect.id}: ${clue} expected row ${expected}`);
+          }
+
+          for (const columnMatch of clue.matchAll(/第\s*(\d+)\s*列/g)) {
+            const expected = cell!.column + 1;
+            const actual = Number(columnMatch[1]);
+            if (actual !== expected) failures.push(`${caseDef.id} ${suspect.id}: ${clue} expected column ${expected}`);
+          }
+
+          if (clue.includes('最后一行') && cell!.row !== caseDef.size.rows - 1) {
+            failures.push(`${caseDef.id} ${suspect.id}: ${clue} expected final row`);
+          }
+
+          if (clue.includes('最后一列') && cell!.column !== caseDef.size.columns - 1) {
+            failures.push(`${caseDef.id} ${suspect.id}: ${clue} expected final column`);
+          }
+
+          const clueRooms = matchedLabels(clue, [...roomLabels]);
+          if (clueRooms.length > 0 && !clueRooms.includes(roomName(cell!.room)!)) {
+            failures.push(`${caseDef.id} ${suspect.id}: ${clue} expected room ${roomName(cell!.room)}`);
+          }
+
+          const clueObjects = matchedLabels(clue, [...objectLabels]);
+          if (clueObjects.length > 0 && !clueObjects.includes(objectName(cell!.object)!)) {
+            failures.push(`${caseDef.id} ${suspect.id}: ${clue} expected object ${objectName(cell!.object)}`);
+          }
+        }
+      }
+    }
+
+    expect(failures).toEqual([]);
   });
 });

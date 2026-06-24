@@ -15,6 +15,9 @@ try {
   await page.getByRole('button', { name: '第 1 行第 2 列' }).click();
   await page.locator('button[aria-label="第 1 行第 2 列"] .cell-object', { hasText: '马' }).waitFor();
 
+  await page.getByRole('button', { name: 'Blanche' }).click();
+  await page.getByText('她在第 4 列。').waitFor();
+
   await page.getByRole('button', { name: 'Aldous' }).click();
   await page.getByRole('button', { name: '第 4 行第 4 列' }).click();
   await page.getByRole('button', { name: '第 4 行第 4 列，Aldous' }).waitFor();

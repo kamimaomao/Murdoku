@@ -123,8 +123,8 @@ const cases: Record<string, { title: string; intro: string; clues: Record<string
     intro: '教学关：每一行、每一列最多只能放一名嫌疑人。根据线索把 4 名嫌疑人放进 4x4 棋盘。',
     clues: {
       'a-aldous': ['他在一株仙人掌旁边。'],
-      'b-blanche': ['她在第 2 列。'],
-      'c-cornelius': ['他在峡谷里。'],
+      'b-blanche': ['她在第 4 列。'],
+      'c-cornelius': ['他在棚屋里。'],
       'd-dahlia': ['她在第 4 行。']
     }
   },
@@ -136,7 +136,7 @@ const cases: Record<string, { title: string; intro: string; clues: Record<string
       'b-bessie': ['她在第 2 行。'],
       'c-curtis': ['他坐在椅子上。'],
       'd-duke': ['他在桌子旁边。'],
-      'e-etta': ['她在最后一列。']
+      'e-etta': ['她在第 5 行。']
     }
   },
   'case-03': {
@@ -144,23 +144,23 @@ const cases: Record<string, { title: string; intro: string; clues: Record<string
     intro: '6x6 入门关：棋盘变大，但线索仍然直接。',
     clues: {
       'a-arnold': ['他在书架旁边。'],
-      'b-bruce': ['他在第 2 列。'],
+      'b-bruce': ['他在第 3 列。'],
       'c-connor': ['他在地毯上。'],
       'd-delilah': ['她在茶点区。'],
       'e-ethan': ['他在第 5 行。'],
-      'f-fern': ['她在植物旁边。']
+      'f-fern': ['她在桌子旁边。']
     }
   },
   'case-04': {
     title: '花店盘点',
     intro: '6x6 练习关：开始出现更多区域边界，先不用处理特殊身份。',
     clues: {
-      'a-albert': ['他在盆景旁边。'],
+      'a-albert': ['他在鲜花旁边。'],
       'b-burma': ['她在备货区。'],
-      'c-craig': ['他在第 3 列。'],
+      'c-craig': ['他在第 1 列。'],
       'd-duncan': ['他坐在椅子上。'],
-      'e-elyana': ['她在店面。'],
-      'f-faith': ['她在鲜花旁边。']
+      'e-elyana': ['她在茶点区。'],
+      'f-faith': ['她在书架旁边。']
     }
   },
   'case-05': {
@@ -168,11 +168,11 @@ const cases: Record<string, { title: string; intro: string; clues: Record<string
     intro: '本关首次引入法外之徒：法外之徒是一名特殊身份的人；他可能是凶手，也可能不是。线索会告诉你法外之徒相关条件。',
     clues: {
       'a-alicia': ['她在灌木旁边。'],
-      'b-brenda': ['她在第 2 列。'],
+      'b-brenda': ['她在第 6 列。'],
       'c-clark': ['他坐在椅子上。'],
-      'd-dylan': ['他是法外之徒；法外之徒在马旁边。'],
+      'd-dylan': ['他是法外之徒；法外之徒在水坑旁边。'],
       'e-ezequiel': ['他在第 5 行。'],
-      'f-florence': ['她在树林里。']
+      'f-florence': ['她在工具棚里。']
     }
   },
   'case-06': {
@@ -193,7 +193,7 @@ const cases: Record<string, { title: string; intro: string; clues: Record<string
     intro: '7x7 进阶关：物件更多，开始要求你结合区域和行列排除。',
     clues: {
       'a-amir': ['他在盆景旁边。'],
-      'b-bianca': ['她在备货区。'],
+      'b-bianca': ['她在店面。'],
       'c-carly': ['她在植物旁边。'],
       'd-diane': ['她在地毯上。'],
       'e-emmett': ['他坐在椅子上。'],
@@ -240,7 +240,7 @@ const cases: Record<string, { title: string; intro: string; clues: Record<string
       'e-ernie': ['他在地毯上。'],
       'f-finn': ['他在书架旁边。'],
       'g-giulia': ['她在树旁边。'],
-      'h-harper': ['她在桌子和地毯旁边。'],
+      'h-harper': ['她在桌子 / 地毯旁边。'],
       'i-vikram': ['他在巨石旁边。']
     }
   }
