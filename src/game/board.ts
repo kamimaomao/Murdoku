@@ -91,6 +91,21 @@ export function applyHint(caseDef: CaseDefinition, state: GameState): GameState 
   return placement ? moveSuspect(state, state.selectedSuspectId, placement.cellId) : state;
 }
 
+export function applyAnswer(caseDef: CaseDefinition, state: GameState): GameState {
+  const placements = Object.fromEntries(
+    caseDef.solution.map((placement) => [placement.cellId, placement.suspectId])
+  ) as BoardState['placements'];
+
+  return {
+    ...state,
+    board: {
+      placements,
+      marks: {}
+    },
+    undoStack: [...state.undoStack, cloneBoard(state.board)]
+  };
+}
+
 export function undo(state: GameState): GameState {
   const previous = state.undoStack[state.undoStack.length - 1];
   if (!previous) return state;

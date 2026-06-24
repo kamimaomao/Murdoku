@@ -1,7 +1,16 @@
 import { type CSSProperties, type DragEvent, type PointerEvent, useMemo, useRef, useState } from 'react';
 import { murdokuLogo, objectAssetFor, roomVisualFor, suspectPortraitFor } from './assets/murdokuAssets';
 import { cases, casesById } from './data/cases';
-import { applyCellAction, applyHint, createInitialGameState, moveSuspect, selectSuspect, setTool, undo } from './game/board';
+import {
+  applyAnswer,
+  applyCellAction,
+  applyHint,
+  createInitialGameState,
+  moveSuspect,
+  selectSuspect,
+  setTool,
+  undo
+} from './game/board';
 import { loadProgress, saveProgress, type ProgressState } from './game/storage';
 import type { BoardState, CaseDefinition, CellDefinition, GameState, Suspect, Tool, ValidationResult } from './game/types';
 import { validateBoard } from './game/validation';
@@ -189,6 +198,11 @@ export default function App() {
     setStatusMessage(`${selectedSuspect.name}${uiText.hintConfirmed}`);
   }
 
+  function showAnswer() {
+    updateGame(applyAnswer(currentCase, game));
+    setStatusMessage(uiText.answerRevealed);
+  }
+
   return (
     <main className="app-shell" aria-label={uiText.appLabel}>
       <header className="case-header">
@@ -259,11 +273,13 @@ export default function App() {
               type="button"
             >
               <img className="cell-terrain-art" src={roomVisual.textureAsset} alt="" aria-hidden="true" />
-              <span className="cell-room">{roomName(cell.room)}</span>
+              {cell.object ? (
+                <span className="cell-object">{objectName(cell.object)}</span>
+              ) : (
+                <span className="cell-room">{roomName(cell.room)}</span>
+              )}
               {objectAsset ? (
                 <img className="cell-object-art" src={objectAsset} alt={objectName(cell.object)} />
-              ) : cell.object ? (
-                <span className="cell-object">{objectName(cell.object)}</span>
               ) : null}
               {marked ? <span className="cell-mark">X</span> : null}
               {suspect ? (
@@ -333,6 +349,9 @@ export default function App() {
         </button>
         <button className="tool-button" onClick={confirmSelectedPosition} type="button">
           {uiText.hint}
+        </button>
+        <button className="tool-button" onClick={showAnswer} type="button">
+          {uiText.answer}
         </button>
         <button className="accuse-button" onClick={submitAccusation} type="button">
           {uiText.accuse}

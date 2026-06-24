@@ -12,6 +12,9 @@ try {
   await page.goto(targetUrl, { waitUntil: 'load' });
   await page.getByRole('heading', { name: '小镇入口' }).waitFor();
 
+  await page.getByRole('button', { name: '第 1 行第 2 列' }).click();
+  await page.locator('button[aria-label="第 1 行第 2 列"] .cell-object', { hasText: '马' }).waitFor();
+
   await page.getByRole('button', { name: 'Aldous' }).click();
   await page.getByRole('button', { name: '第 4 行第 4 列' }).click();
   await page.getByRole('button', { name: '第 4 行第 4 列，Aldous' }).waitFor();
@@ -38,6 +41,13 @@ try {
   await page.getByRole('button', { name: '提示' }).click();
   await page.getByRole('button', { name: '第 2 行第 2 列，Aldous' }).waitFor();
   await page.getByText('Aldous的位置已确认。').waitFor();
+
+  await page.getByRole('button', { name: '答案' }).click();
+  await page.getByRole('button', { name: '第 2 行第 2 列，Aldous' }).waitFor();
+  await page.getByRole('button', { name: '第 1 行第 4 列，Blanche' }).waitFor();
+  await page.getByRole('button', { name: '第 3 行第 1 列，Cornelius' }).waitFor();
+  await page.getByRole('button', { name: '第 4 行第 3 列，Dahlia' }).waitFor();
+  await page.getByText('答案已显示。').waitFor();
 
   await page.screenshot({ path: 'tests/smoke/mobile-smoke.png', fullPage: false });
 } finally {

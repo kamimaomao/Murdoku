@@ -57,6 +57,26 @@ describe('App', () => {
     ).toBeInTheDocument();
   });
 
+  it('shows the full answer on the board', async () => {
+    const user = userEvent.setup();
+    const firstCase = cases[0];
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: /答案/i }));
+
+    for (const placement of firstCase.solution) {
+      const suspect = firstCase.suspects.find((candidate) => candidate.id === placement.suspectId);
+      expect(suspect).toBeDefined();
+
+      const [row, column] = placement.cellId.split('-').map(Number);
+      expect(
+        screen.getByRole('button', { name: new RegExp(`第 ${row + 1} 行第 ${column + 1} 列.*${suspect!.name}`, 'i') })
+      ).toBeInTheDocument();
+    }
+
+    expect(screen.getByRole('status')).toHaveTextContent(/答案已显示/i);
+  });
+
   it('moves a placed suspect by dragging from one board cell to another', async () => {
     const user = userEvent.setup();
     render(<App />);
@@ -109,6 +129,17 @@ describe('App', () => {
 
     expect(firstCell).toHaveClass('labels-revealed');
     expect(container.querySelectorAll('.board-cell.labels-revealed')).toHaveLength(1);
+  });
+
+  it('reveals the object name before the room name when a tapped cell has both', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    const objectCell = screen.getByRole('button', { name: /^第 1 行第 2 列$/i });
+
+    await user.click(objectCell);
+
+    expect(within(objectCell).getByText('马')).toHaveClass('cell-object');
+    expect(within(objectCell).queryByText('沙漠')).not.toBeInTheDocument();
   });
 
   it('renders suspect portraits on the board after placement', async () => {

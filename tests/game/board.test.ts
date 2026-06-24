@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyCellAction, applyHint, createInitialGameState, moveSuspect, undo } from '../../src/game/board';
+import { applyAnswer, applyCellAction, applyHint, createInitialGameState, moveSuspect, undo } from '../../src/game/board';
 import type { CaseDefinition } from '../../src/game/types';
 
 const hintCase: CaseDefinition = {
@@ -98,6 +98,26 @@ describe('board state', () => {
     expect(next.board.placements['0-0']).toBeUndefined();
     expect(next.board.placements['1-1']).toBe('ada');
     expect(next.board.marks['1-1']).toBeUndefined();
+  });
+
+  it('fills the board with every solution placement when showing the answer', () => {
+    const state = {
+      ...createInitialGameState('case-hint'),
+      activeTool: 'x' as const,
+      board: {
+        placements: { '0-1': 'ada' },
+        marks: { '0-0': true, '1-1': true }
+      }
+    };
+
+    const next = applyAnswer(hintCase, state);
+
+    expect(next.board.placements).toEqual({
+      '1-1': 'ada',
+      '0-0': 'victim'
+    });
+    expect(next.board.marks).toEqual({});
+    expect(next.undoStack).toHaveLength(1);
   });
 
   it('marks X and clears an existing placement', () => {
