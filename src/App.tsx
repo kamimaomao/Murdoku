@@ -48,6 +48,12 @@ function cellPositionKey(row: number, column: number): string {
   return `${row}-${column}`;
 }
 
+function portraitVariantClass(caseDef: CaseDefinition, suspect: Suspect | undefined): string {
+  if (!suspect) return '';
+  const suspectIndex = caseDef.suspects.findIndex((candidate) => candidate.id === suspect.id);
+  return `portrait-variant-${Math.max(suspectIndex, 0) % 5}`;
+}
+
 function roomEdgeClasses(cell: CellDefinition, cellsByPosition: Map<string, CellDefinition>): string[] {
   const room = cell.room ?? '';
   const directions = [
@@ -143,12 +149,16 @@ export default function App() {
     return zhIssueText(result.issues[0]);
   }
 
-  function handleCellClick(cellId: CellDefinition['id']) {
+  function handleCellClick(cellId: CellDefinition['id'], suspect: Suspect | undefined) {
     if (skipNextClickRef.current) {
       skipNextClickRef.current = false;
       return;
     }
     setRevealedCellId(cellId);
+    if (game.activeTool === 'place' && suspect && suspect.id !== game.selectedSuspectId) {
+      updateGame(selectSuspect(game, suspect.id), false);
+      return;
+    }
     updateGame(applyCellAction(game, cellId));
   }
 
@@ -233,6 +243,7 @@ export default function App() {
       </section>
 
       <section className="briefing" aria-label={uiText.briefing}>
+        <p className="rule-note">{uiText.coreRule}</p>
         <p>{caseIntro(currentCase)}</p>
       </section>
 
@@ -252,6 +263,7 @@ export default function App() {
             ...roomEdgeClasses(cell, cellsByPosition),
             revealedCellId === cell.id ? 'labels-revealed' : '',
             objectAsset ? 'has-object' : '',
+            suspect?.id === selectedSuspect?.id ? 'selected-suspect' : '',
             suspect ? 'occupied' : marked ? 'marked' : ''
           ]
             .filter(Boolean)
@@ -263,7 +275,7 @@ export default function App() {
               className={cellClass}
               draggable={Boolean(suspect)}
               key={cell.id}
-              onClick={() => handleCellClick(cell.id)}
+              onClick={() => handleCellClick(cell.id, suspect)}
               onDragOver={(event) => event.preventDefault()}
               onDragStart={(event) => handleCellDragStart(event, suspect)}
               onDrop={(event) => handleCellDrop(event, cell.id)}
@@ -283,7 +295,12 @@ export default function App() {
               ) : null}
               {marked ? <span className="cell-mark">X</span> : null}
               {suspect ? (
-                <img className="cell-suspect-photo" src={suspectPortraitFor(suspect)} alt="" aria-hidden="true" />
+                <img
+                  className={`cell-suspect-photo ${portraitVariantClass(currentCase, suspect)}`}
+                  src={suspectPortraitFor(suspect)}
+                  alt=""
+                  aria-hidden="true"
+                />
               ) : null}
             </button>
           );
@@ -324,7 +341,12 @@ export default function App() {
               style={{ '--accent': suspect.accent } as CSSProperties}
               type="button"
             >
-              <img className="avatar portrait-avatar" src={suspectPortraitFor(suspect)} alt="" aria-hidden="true" />
+              <img
+                className={`avatar portrait-avatar ${portraitVariantClass(currentCase, suspect)}`}
+                src={suspectPortraitFor(suspect)}
+                alt=""
+                aria-hidden="true"
+              />
               <span>{suspect.name}</span>
               {isPlaced ? <span className="placed-dot" aria-label={uiText.placed} /> : null}
             </button>

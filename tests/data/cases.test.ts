@@ -94,6 +94,24 @@ describe('case data', () => {
     expect(visibleText.filter((text) => englishClueWording.test(text))).toEqual([]);
   });
 
+  it('uses less ambiguous area wording for directional clues and square wording for horse clues', () => {
+    const horseCase = cases.find((caseDef) => caseTitle(caseDef) === '无名之马');
+    expect(horseCase).toBeDefined();
+    const cornelius = horseCase!.suspects.find((suspect) => suspect.name === 'Cornelius');
+    expect(cornelius).toBeDefined();
+
+    const corneliusClues = suspectClues(horseCase!.id, cornelius!).join('');
+    expect(corneliusClues).toContain('上方区域');
+    expect(corneliusClues).not.toMatch(/北边|北侧/);
+
+    const ridingLesson = cases.find((caseDef) => caseTitle(caseDef) === '骑术课');
+    expect(ridingLesson).toBeDefined();
+    const ridingClues = ridingLesson!.suspects.flatMap((suspect) => suspectClues(ridingLesson!.id, suspect)).join('');
+    expect(ridingClues).toContain('马格');
+    expect(ridingClues).toContain('训练场的马格');
+    expect(ridingClues).not.toMatch(/骑在|horse|Horse/);
+  });
+
   it('keeps localized direct clue text aligned with each solution cell', () => {
     const failures: string[] = [];
 

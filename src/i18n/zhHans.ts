@@ -21,6 +21,7 @@ export const uiText = {
   noSuspectSelected: '未选择嫌疑人',
   chooseSuspect: '选择嫌疑人',
   chooseHint: '选择嫌疑人，然后点击格子。',
+  coreRule: '规则：每一行、每一列只能放一个角色。',
   placed: '已放置',
   undo: '撤销',
   hint: '提示',
@@ -360,16 +361,25 @@ const ordinalNumbers: Record<string, number> = {
 };
 
 const directions: Record<string, string> = {
-  north: '北侧',
-  south: '南侧',
-  east: '东侧',
-  west: '西侧',
-  northeast: '东北侧',
-  northwest: '西北侧',
-  southeast: '东南侧',
-  southwest: '西南侧',
-  above: '北侧',
-  below: '南侧'
+  north: '上方区域',
+  south: '下方区域',
+  east: '右侧区域',
+  west: '左侧区域',
+  northeast: '右上方区域',
+  northwest: '左上方区域',
+  southeast: '右下方区域',
+  southwest: '左下方区域',
+  above: '上方区域',
+  below: '下方区域'
+};
+
+const exactDirections: Record<string, string> = {
+  north: '上方',
+  south: '下方',
+  east: '右侧',
+  west: '左侧',
+  above: '上方',
+  below: '下方'
 };
 
 function directionText(direction: string): string {
@@ -378,7 +388,7 @@ function directionText(direction: string): string {
 
 function rowOrColumnText(kind: string, direction: string): string {
   const axis = kind.toLowerCase() === 'row' ? '一行' : '一列';
-  return `正${directionText(direction).replace('侧', '')}${axis}`;
+  return `正${exactDirections[direction.toLowerCase()] ?? direction}${axis}`;
 }
 
 function translateObjectGridSentence(sentence: string): string | undefined {
@@ -387,6 +397,11 @@ function translateObjectGridSentence(sentence: string): string | undefined {
 
   const byMatch = sentence.match(/^(He|She) was (?:by|on|at) (?:a |an |the |some )?(.+)$/i);
   if (byMatch) return `${pronounText(sentence)}在${gridPlacementTerm(byMatch[2])}。`;
+
+  const sittingInRoomMatch = sentence.match(/^(He|She) was sitting (?:in|on) (?:a |an |the )?(.+) in (?:the )?(.+)$/i);
+  if (sittingInRoomMatch) {
+    return `${pronounText(sentence)}在${roomTerm(sittingInRoomMatch[3])}的${gridPlacementTerm(sittingInRoomMatch[2])}。`;
+  }
 
   const sittingMatch = sentence.match(/^(He|She) was sitting (?:in|on) (?:a |an |the )?(.+)$/i);
   if (sittingMatch) return `${pronounText(sentence)}在${gridPlacementTerm(sittingMatch[2])}。`;
@@ -461,12 +476,12 @@ function translateSimpleClueSentence(sentence: string): string {
 
   const personOnObjectOffsetMatch = clean.match(/^(He|She) was (?:exactly )?one (row|column) (north|south|east|west|above|below) of someone (?:by|on|at|sitting in|sitting on) (?:a |an |the |some )?(.+)$/i);
   if (personOnObjectOffsetMatch) {
-    return `${pronounText(clean)}在某个${gridPlacementTerm(personOnObjectOffsetMatch[4])}人物的${rowOrColumnText(personOnObjectOffsetMatch[2], personOnObjectOffsetMatch[3])}。`;
+    return `${pronounText(clean)}在某个在${gridPlacementTerm(personOnObjectOffsetMatch[4])}的人物的${rowOrColumnText(personOnObjectOffsetMatch[2], personOnObjectOffsetMatch[3])}。`;
   }
 
   const womanOnObjectOffsetMatch = clean.match(/^(He|She) was (?:exactly )?one (row|column) (north|south|east|west|above|below) of a woman (?:by|on|at|sitting in|sitting on) (?:a |an |the |some )?(.+)$/i);
   if (womanOnObjectOffsetMatch) {
-    return `${pronounText(clean)}在某名${gridPlacementTerm(womanOnObjectOffsetMatch[4])}女性的${rowOrColumnText(womanOnObjectOffsetMatch[2], womanOnObjectOffsetMatch[3])}。`;
+    return `${pronounText(clean)}在某名在${gridPlacementTerm(womanOnObjectOffsetMatch[4])}的女性的${rowOrColumnText(womanOnObjectOffsetMatch[2], womanOnObjectOffsetMatch[3])}。`;
   }
 
   const compoundDirectionMatch = clean.match(/^(He|She) was (north|south|east|west|northeast|northwest|southeast|southwest) of ([^,]+?)(?:, in a different area)? and (north|south|east|west|northeast|northwest|southeast|southwest) of (.+)$/i);

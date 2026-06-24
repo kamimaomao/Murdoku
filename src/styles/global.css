@@ -157,6 +157,11 @@ h2 {
   margin: 0;
 }
 
+.briefing .rule-note {
+  margin-bottom: 6px;
+  font-weight: 900;
+}
+
 .board {
   display: grid;
   gap: 1px;
@@ -230,6 +235,11 @@ h2 {
   outline: 2px solid var(--accent, var(--accent-2));
   cursor: grab;
   touch-action: none;
+}
+
+.board-cell.selected-suspect {
+  outline-width: 3px;
+  box-shadow: inset 0 0 0 2px rgba(255, 242, 220, 0.6);
 }
 
 .board-cell.marked {
@@ -320,18 +330,75 @@ h2 {
 }
 
 .cell-suspect-photo {
+  --portrait-rotate: -4deg;
+  --portrait-scale: 1;
+  --portrait-active-scale: 1.06;
+  --portrait-radius: 4px;
+  --portrait-hue: 0deg;
+  --portrait-saturation: 1.08;
   position: absolute;
   inset: 50% auto auto 50%;
   z-index: 5;
-  width: 84%;
-  height: 92%;
-  border: 2px solid #fff2dc;
-  border-radius: 3px;
+  width: 88%;
+  height: 96%;
+  border: 3px solid var(--accent, #fff2dc);
+  border-radius: var(--portrait-radius);
   background: #fff2dc;
   box-shadow: 0 2px 0 rgba(34, 24, 19, 0.72), 0 4px 8px rgba(29, 20, 15, 0.34);
   object-fit: cover;
   pointer-events: none;
-  transform: translate(-50%, -50%) rotate(-4deg);
+  filter: saturate(var(--portrait-saturation)) hue-rotate(var(--portrait-hue));
+  transform: translate(-50%, -50%) rotate(var(--portrait-rotate)) scale(var(--portrait-scale));
+}
+
+.portrait-variant-1 {
+  --portrait-rotate: 5deg;
+  --portrait-scale: 0.96;
+  --portrait-active-scale: 1.02;
+  --portrait-radius: 10px;
+  --portrait-hue: 7deg;
+}
+
+.portrait-variant-2 {
+  --portrait-rotate: -9deg;
+  --portrait-scale: 1.03;
+  --portrait-active-scale: 1.09;
+  --portrait-radius: 2px;
+  --portrait-hue: -8deg;
+}
+
+.portrait-variant-3 {
+  --portrait-rotate: 8deg;
+  --portrait-scale: 0.92;
+  --portrait-active-scale: 0.99;
+  --portrait-radius: 14px;
+  --portrait-hue: 14deg;
+  --portrait-saturation: 1.18;
+}
+
+.portrait-variant-4 {
+  --portrait-rotate: -2deg;
+  --portrait-scale: 1.08;
+  --portrait-active-scale: 1.13;
+  --portrait-radius: 7px;
+  --portrait-hue: -14deg;
+  --portrait-saturation: 1.16;
+}
+
+.board-cell.selected-suspect .cell-suspect-photo {
+  animation: suspect-breathe 1150ms ease-in-out infinite;
+  box-shadow: 0 2px 0 rgba(34, 24, 19, 0.72), 0 0 0 3px rgba(255, 242, 220, 0.82), 0 7px 12px rgba(29, 20, 15, 0.38);
+}
+
+@keyframes suspect-breathe {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) rotate(var(--portrait-rotate)) scale(var(--portrait-scale));
+  }
+
+  50% {
+    transform: translate(-50%, -52%) rotate(var(--portrait-rotate)) scale(var(--portrait-active-scale));
+  }
 }
 
 .cell-mark {
@@ -369,6 +436,8 @@ h2 {
 .portrait-avatar {
   display: block;
   background: #fff2dc;
+  border-radius: var(--portrait-radius, 7px);
+  filter: saturate(var(--portrait-saturation, 1.08)) hue-rotate(var(--portrait-hue, 0deg));
   object-fit: cover;
 }
 
@@ -402,6 +471,10 @@ h2 {
   height: 30px;
   border-width: 1px;
   border-radius: 5px;
+}
+
+.suspect-token .portrait-avatar {
+  transform: rotate(var(--portrait-rotate, 0deg)) scale(var(--portrait-scale, 1));
 }
 
 .suspect-token.active {
@@ -492,5 +565,11 @@ h2 {
   .accuse-button {
     padding-inline: 4px;
     font-size: 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board-cell.selected-suspect .cell-suspect-photo {
+    animation: none;
   }
 }

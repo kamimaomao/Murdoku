@@ -31,6 +31,12 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: /^第 4 行第 4 列$/i })).toBeInTheDocument();
   });
 
+  it('explains the one suspect per row and column rule before play', () => {
+    render(<App />);
+
+    expect(screen.getByText('规则：每一行、每一列只能放一个角色。')).toBeInTheDocument();
+  });
+
   it('removes a placed suspect when tapping their board cell again', async () => {
     const user = userEvent.setup();
     render(<App />);
@@ -40,6 +46,24 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: /第 4 行第 4 列.*Aldous/i }));
 
     expect(screen.getByRole('button', { name: /^第 4 行第 4 列$/i })).toBeInTheDocument();
+  });
+
+  it('selects an occupied board suspect instead of moving the current selection onto them', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const suspectDock = screen.getByRole('region', { name: '嫌疑人' });
+    await user.click(within(suspectDock).getByRole('button', { name: /Aldous/i }));
+    await user.click(screen.getByRole('button', { name: /^第 4 行第 4 列$/i }));
+    await user.click(within(suspectDock).getByRole('button', { name: /Blanche/i }));
+    await user.click(screen.getByRole('button', { name: /^第 1 行第 4 列$/i }));
+
+    await user.click(within(suspectDock).getByRole('button', { name: /Aldous/i }));
+    await user.click(screen.getByRole('button', { name: /第 1 行第 4 列.*Blanche/i }));
+
+    expect(screen.getByRole('heading', { name: 'Blanche' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /第 4 行第 4 列.*Aldous/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /第 1 行第 4 列.*Blanche/i })).toBeInTheDocument();
   });
 
   it('uses a hint to confirm the selected suspect position', async () => {
@@ -153,6 +177,21 @@ describe('App', () => {
       'src',
       '/murdoku-assets/portraits/case-01-a-aldous.svg'
     );
+  });
+
+  it('highlights the selected suspect portrait on the board and varies portrait presentation', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<App />);
+
+    await user.click(screen.getByRole('button', { name: /答案/i }));
+    await user.click(within(screen.getByRole('region', { name: '嫌疑人' })).getByRole('button', { name: /Aldous/i }));
+
+    expect(screen.getByRole('button', { name: /第 2 行第 2 列.*Aldous/i })).toHaveClass('selected-suspect');
+
+    const portraitVariants = Array.from(container.querySelectorAll('.cell-suspect-photo')).map((photo) =>
+      Array.from(photo.classList).find((className) => className.startsWith('portrait-variant-'))
+    );
+    expect(new Set(portraitVariants).size).toBeGreaterThan(1);
   });
 
   it('closes the case when all suspects match the solution', async () => {
