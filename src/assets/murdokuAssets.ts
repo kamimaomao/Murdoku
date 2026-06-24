@@ -26,6 +26,7 @@ const objectAssets: Record<string, string> = {
   sack: 'obj_sack.svg',
   safe: 'obj_safe.svg',
   shelf: 'obj_shelf.svg',
+  statue: 'obj_statue.svg',
   table: 'obj_table.svg',
   'table-carpet': 'obj_table_carpet.svg',
   television: 'obj_television.svg',

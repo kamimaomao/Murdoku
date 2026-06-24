@@ -53,6 +53,12 @@ try {
   await page.getByText('答案已显示。').waitFor();
 
   await page.screenshot({ path: 'tests/smoke/mobile-smoke.png', fullPage: false });
+
+  await page.getByRole('button', { name: /20/ }).waitFor();
+  await page.getByRole('button', { name: '6 简单', exact: true }).click();
+  await page.getByRole('heading', { name: '无名之马' }).waitFor();
+  await page.getByRole('button', { name: 'Aldous' }).click();
+  await page.getByText('他靠近仙人掌。').waitFor();
 } finally {
   await browser.close();
 }

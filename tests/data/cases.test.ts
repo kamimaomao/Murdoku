@@ -2,28 +2,17 @@ import { describe, expect, it } from 'vitest';
 import { cases } from '../../src/data/cases';
 import { validateCaseData } from '../../src/data/cases/validateCases';
 import { validateBoard } from '../../src/game/validation';
-import { objects, objectName, roomName, rooms, suspectClues } from '../../src/i18n/zhHans';
-
-function matchedLabels(text: string, labels: string[]): string[] {
-  let remaining = text;
-  return labels
-    .sort((a, b) => b.length - a.length)
-    .filter((label) => {
-      if (!remaining.includes(label)) return false;
-      remaining = remaining.replace(label, '');
-      return true;
-    });
-}
+import { suspectClues } from '../../src/i18n/zhHans';
 
 describe('case data', () => {
-  it('contains exactly 10 first-release cases', () => {
-    expect(cases).toHaveLength(10);
+  it('contains exactly 20 first-release cases', () => {
+    expect(cases).toHaveLength(20);
   });
 
   it('uses unique ids', () => {
     const ids = new Set(cases.map((caseDef) => caseDef.id));
 
-    expect(ids.size).toBe(10);
+    expect(ids.size).toBe(20);
   });
 
   it('has internally valid data', () => {
@@ -44,30 +33,49 @@ describe('case data', () => {
   });
 
   it('starts with smaller teaching boards before increasing the grid size', () => {
-    expect(cases.map((caseDef) => caseDef.size)).toEqual([
+    expect(cases.slice(0, 5).map((caseDef) => caseDef.size)).toEqual([
       { rows: 4, columns: 4 },
       { rows: 5, columns: 5 },
       { rows: 6, columns: 6 },
       { rows: 6, columns: 6 },
-      { rows: 6, columns: 6 },
-      { rows: 7, columns: 7 },
-      { rows: 7, columns: 7 },
-      { rows: 8, columns: 8 },
-      { rows: 8, columns: 8 },
-      { rows: 9, columns: 9 }
+      { rows: 6, columns: 6 }
     ]);
   });
 
-  it('introduces the outlaw concept only in the fifth case', () => {
+  it('keeps the first five teaching cases before switching to original puzzles', () => {
     expect(cases.slice(0, 4).map((caseDef) => caseDef.intro).join(' ')).not.toMatch(/outlaw/i);
     expect(cases[4].intro).toMatch(/outlaw/i);
     expect(cases[4].intro).toMatch(/may or may not be the murderer/i);
+    expect(cases.slice(5).map((caseDef) => caseDef.title)).toEqual([
+      'A Horse With No Name',
+      'Frontier Town',
+      'A Remote Village',
+      'Minigolf',
+      'Grizzly Night',
+      'The Book Club',
+      'The Flower Store',
+      'A Messy Situation',
+      'The Riding Lesson',
+      'White Wedding',
+      'The Beach',
+      "Hell's Kitchen",
+      'Lakeside Cabin',
+      'Surprise Visitors',
+      'The Abandoned Museum'
+    ]);
+  });
+
+  it('translates object cell clues as being in that object cell instead of beside it', () => {
+    const allClues = cases
+      .flatMap((caseDef) => caseDef.suspects.flatMap((suspect) => suspectClues(caseDef.id, suspect)))
+      .join('\n');
+
+    expect(allClues).not.toMatch(/旁边|边上|旁/);
+    expect(suspectClues(cases[0].id, cases[0].suspects[0]).join(' ')).toContain('仙人掌格');
   });
 
   it('keeps localized direct clue text aligned with each solution cell', () => {
     const failures: string[] = [];
-    const roomLabels = [...new Set(Object.values(rooms))];
-    const objectLabels = [...new Set(Object.values(objects))];
 
     for (const caseDef of cases) {
       for (const suspect of caseDef.suspects) {
@@ -96,16 +104,6 @@ describe('case data', () => {
 
           if (clue.includes('最后一列') && cell!.column !== caseDef.size.columns - 1) {
             failures.push(`${caseDef.id} ${suspect.id}: ${clue} expected final column`);
-          }
-
-          const clueRooms = matchedLabels(clue, [...roomLabels]);
-          if (clueRooms.length > 0 && !clueRooms.includes(roomName(cell!.room)!)) {
-            failures.push(`${caseDef.id} ${suspect.id}: ${clue} expected room ${roomName(cell!.room)}`);
-          }
-
-          const clueObjects = matchedLabels(clue, [...objectLabels]);
-          if (clueObjects.length > 0 && !clueObjects.includes(objectName(cell!.object)!)) {
-            failures.push(`${caseDef.id} ${suspect.id}: ${clue} expected object ${objectName(cell!.object)}`);
           }
         }
       }

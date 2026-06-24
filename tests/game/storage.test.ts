@@ -31,10 +31,12 @@ describe('progress storage', () => {
   });
 
   it('ignores legacy progress from the previous case layout', () => {
-    localStorage.setItem(
-      'murdoku-mobile-progress',
-      JSON.stringify({ cases: { 'case-01': { state: createInitialGameState('case-01'), completed: true } } })
-    );
+    for (const key of ['murdoku-mobile-progress', 'murdoku-mobile-progress-v2']) {
+      localStorage.setItem(
+        key,
+        JSON.stringify({ cases: { 'case-01': { state: createInitialGameState('case-01'), completed: true } } })
+      );
+    }
 
     expect(loadProgress()).toEqual({ cases: {} });
   });
