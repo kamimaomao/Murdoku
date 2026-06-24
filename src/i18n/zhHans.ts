@@ -92,14 +92,15 @@ export const rooms: Record<string, string> = {
   Storage: '储藏室',
   'Store Floor': '店面',
   Tavern: '酒馆',
-  'Tent A': '帐篷 A',
-  'Tent B': '帐篷 B',
-  'Tent C': '帐篷 C',
+  'Tent A': '帐篷甲',
+  'Tent B': '帐篷乙',
+  'Tent C': '帐篷丙',
   'The Barrels': '木桶区',
   'The Desert': '沙漠区',
   'The Island': '岛上',
   'Tool Shed': '工具棚',
   'Training Ring': '训练场',
+  Vault: '保险库',
   Walkway: '走道',
   Water: '水域',
   'West Court': '西庭院',
@@ -285,6 +286,10 @@ function pronounText(text: string): string {
   return /^She\b/i.test(text) ? '她' : /^He\b/i.test(text) ? '他' : '';
 }
 
+function areaText(pronoun: string): string {
+  return /^her$/i.test(pronoun) ? '她所在区域' : '他所在区域';
+}
+
 function normalizeEnglishTerm(term: string): string {
   return term
     .toLowerCase()
@@ -306,10 +311,74 @@ function objectTerm(term: string): string {
   return objectKey ? objects[objectKey] : term.trim();
 }
 
+function exactRoomTerm(term: string): string | undefined {
+  const trimmed = term.trim();
+  const exactKey = Object.keys(rooms).find((key) => key.toLowerCase() === trimmed.toLowerCase());
+  if (exactKey) return rooms[exactKey];
+
+  const withoutArticle = trimmed.replace(/^(a|an|the)\s+/i, '');
+  const articleKey = Object.keys(rooms).find((key) => key.toLowerCase() === withoutArticle.toLowerCase());
+  if (articleKey) return rooms[articleKey];
+
+  const withoutArea = withoutArticle.replace(/\s+area$/i, '');
+  const areaKey = Object.keys(rooms).find((key) => key.toLowerCase() === withoutArea.toLowerCase());
+  if (areaKey) return rooms[areaKey];
+
+  return undefined;
+}
+
 function roomTerm(term: string): string {
+  const exact = exactRoomTerm(term);
+  if (exact) return exact;
+
   const normalized = normalizeEnglishTerm(term);
   const roomKey = Object.keys(rooms).find((key) => normalizeEnglishTerm(key) === normalized);
   return roomKey ? rooms[roomKey] : term.trim();
+}
+
+function gridPlacementTerm(term: string): string {
+  const normalized = normalizeEnglishTerm(term);
+  if (normalized === 'path square') return `${rooms.Path}格`;
+  if (normalized === 'sand tile') return `${rooms.Sand}格`;
+
+  const room = exactRoomTerm(term);
+  if (room) return room;
+
+  return `${objectTerm(term)}格`;
+}
+
+const ordinalNumbers: Record<string, number> = {
+  first: 1,
+  second: 2,
+  third: 3,
+  fourth: 4,
+  fifth: 5,
+  sixth: 6,
+  seventh: 7,
+  eighth: 8,
+  ninth: 9
+};
+
+const directions: Record<string, string> = {
+  north: '北侧',
+  south: '南侧',
+  east: '东侧',
+  west: '西侧',
+  northeast: '东北侧',
+  northwest: '西北侧',
+  southeast: '东南侧',
+  southwest: '西南侧',
+  above: '北侧',
+  below: '南侧'
+};
+
+function directionText(direction: string): string {
+  return directions[direction.toLowerCase()] ?? direction;
+}
+
+function rowOrColumnText(kind: string, direction: string): string {
+  const axis = kind.toLowerCase() === 'row' ? '一行' : '一列';
+  return `正${directionText(direction).replace('侧', '')}${axis}`;
 }
 
 function translateObjectGridSentence(sentence: string): string | undefined {
@@ -317,58 +386,176 @@ function translateObjectGridSentence(sentence: string): string | undefined {
   if (besideMatch) return `${pronounText(sentence)}靠近${objectTerm(besideMatch[2])}。`;
 
   const byMatch = sentence.match(/^(He|She) was (?:by|on|at) (?:a |an |the |some )?(.+)$/i);
-  if (byMatch) return `${pronounText(sentence)}在${objectTerm(byMatch[2])}格。`;
+  if (byMatch) return `${pronounText(sentence)}在${gridPlacementTerm(byMatch[2])}。`;
 
   const sittingMatch = sentence.match(/^(He|She) was sitting (?:in|on) (?:a |an |the )?(.+)$/i);
-  if (sittingMatch) return `${pronounText(sentence)}在${objectTerm(sittingMatch[2])}格。`;
+  if (sittingMatch) return `${pronounText(sentence)}在${gridPlacementTerm(sittingMatch[2])}。`;
+
+  const notSittingMatch = sentence.match(/^(He|She) was not sitting (?:in|on) (?:a |an |the )?(.+)$/i);
+  if (notSittingMatch) return `${pronounText(sentence)}不在${gridPlacementTerm(notSittingMatch[2])}。`;
 
   const notBesideOnlyMatch = sentence.match(/^(He|She) was not beside (?:a |an |the |some )?(.+)$/i);
   if (notBesideOnlyMatch) return `${pronounText(sentence)}不靠近${objectTerm(notBesideOnlyMatch[2])}。`;
 
   const notBesideMatch = sentence.match(/^(He|She) was not (?:by|on|at) (?:a |an |the |some )?(.+)$/i);
-  if (notBesideMatch) return `${pronounText(sentence)}不在${objectTerm(notBesideMatch[2])}格。`;
+  if (notBesideMatch) return `${pronounText(sentence)}不在${gridPlacementTerm(notBesideMatch[2])}。`;
 
   const onlyBesideMatch = sentence.match(/^(He|She) was the only person beside (?:a |an |the |some )?(.+)$/i);
   if (onlyBesideMatch) return `${pronounText(sentence)}是唯一靠近${objectTerm(onlyBesideMatch[2])}的人。`;
 
-  const onlyPersonMatch = sentence.match(/^(He|She) was the only person (?:by|on|at|sitting in|sitting on) (?:a |an |the |some )?(.+)$/i);
-  if (onlyPersonMatch) return `${pronounText(sentence)}是唯一在${objectTerm(onlyPersonMatch[2])}格的人。`;
+  const onlyPersonMatch = sentence.match(/^(He|She) was the only person (?:by|in|on|at|sitting in|sitting on) (?:a |an |the |some )?(.+)$/i);
+  if (onlyPersonMatch) return `${pronounText(sentence)}是唯一在${gridPlacementTerm(onlyPersonMatch[2])}的人。`;
 
   return undefined;
 }
 
 function translateSimpleClueSentence(sentence: string): string {
-  const clean = sentence.trim().replace(/\.$/, '');
+  const clean = sentence.replace(/\s+/g, ' ').trim().replace(/\.$/, '');
   if (!clean) return '';
-
-  const objectGrid = translateObjectGridSentence(clean);
-  if (objectGrid) return objectGrid;
 
   if (/^The Victim$/i.test(clean)) return '受害者。';
   if (/^Not the outlaw$/i.test(clean)) return '不是法外之徒。';
   if (/^The Victim\.? Not the outlaw$/i.test(clean)) return '受害者。不是法外之徒。';
+  if (/^(He|She) is in the last remaining position$/i.test(clean)) return `${pronounText(clean)}在最后剩下的位置。`;
 
-  const roomMatch = clean.match(/^(He|She) was (?:in|inside|on) (?:the )?(.+)$/i);
-  if (roomMatch) return `${pronounText(clean)}在${roomTerm(roomMatch[2])}。`;
+  const objectGrid = translateObjectGridSentence(clean);
+  if (objectGrid) return objectGrid;
 
-  const notRoomMatch = clean.match(/^(He|She) was not (?:in|inside|on) (?:the )?(.+)$/i);
-  if (notRoomMatch) return `${pronounText(clean)}不在${roomTerm(notRoomMatch[2])}。`;
-
-  const columnWords: Record<string, number> = { first: 1, second: 2, third: 3, fourth: 4, fifth: 5 };
-  const columnMatch = clean.match(/^(He|She) was in the (first|second|third|fourth|fifth|last) column$/i);
+  const columnMatch = clean.match(/^(He|She) was in the (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|last) column$/i);
   if (columnMatch) {
     return columnMatch[2].toLowerCase() === 'last'
       ? `${pronounText(clean)}在最后一列。`
-      : `${pronounText(clean)}在第 ${columnWords[columnMatch[2].toLowerCase()]} 列。`;
+      : `${pronounText(clean)}在第 ${ordinalNumbers[columnMatch[2].toLowerCase()]} 列。`;
   }
 
-  const rowMatch = clean.match(/^(He|She) was in the (top|bottom|first|second|third|fourth|fifth|last) row$/i);
+  const rowMatch = clean.match(/^(He|She) was in the (top|bottom|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|last) row$/i);
   if (rowMatch) {
     const row = rowMatch[2].toLowerCase();
     if (row === 'top' || row === 'first') return `${pronounText(clean)}在第 1 行。`;
     if (row === 'bottom' || row === 'last') return `${pronounText(clean)}在最后一行。`;
-    return `${pronounText(clean)}在第 ${columnWords[row]} 行。`;
+    return `${pronounText(clean)}在第 ${ordinalNumbers[row]} 行。`;
   }
+
+  if (/^(He|She) was in the top or in the bottom row$/i.test(clean)) {
+    return `${pronounText(clean)}在最上行或最下行。`;
+  }
+
+  if (/^(He|She) was in a corner of (?:his|her) area$/i.test(clean)) {
+    return `${pronounText(clean)}在自己区域的角落。`;
+  }
+
+  if (/^(He|She) was not in a corner$/i.test(clean)) return `${pronounText(clean)}不在角落。`;
+
+  const sameDiagonalMatch = clean.match(/^(He|She) was in the same diagonal as (.+)$/i);
+  if (sameDiagonalMatch) return `${pronounText(clean)}和 ${sameDiagonalMatch[2]} 在同一条对角线上。`;
+
+  const exactOffsetMatch = clean.match(/^(He|She) was exactly one (row|column) (north|south|east|west|above|below) of (.+)$/i);
+  if (exactOffsetMatch) {
+    return `${pronounText(clean)}在 ${exactOffsetMatch[4]} 的${rowOrColumnText(exactOffsetMatch[2], exactOffsetMatch[3])}。`;
+  }
+
+  const exactAboveBelowMatch = clean.match(/^(He|She) was exactly one (row|column) (above|below) (.+)$/i);
+  if (exactAboveBelowMatch) {
+    return `${pronounText(clean)}在 ${exactAboveBelowMatch[4]} 的${rowOrColumnText(exactAboveBelowMatch[2], exactAboveBelowMatch[3])}。`;
+  }
+
+  const personOnObjectOffsetMatch = clean.match(/^(He|She) was (?:exactly )?one (row|column) (north|south|east|west|above|below) of someone (?:by|on|at|sitting in|sitting on) (?:a |an |the |some )?(.+)$/i);
+  if (personOnObjectOffsetMatch) {
+    return `${pronounText(clean)}在某个${gridPlacementTerm(personOnObjectOffsetMatch[4])}人物的${rowOrColumnText(personOnObjectOffsetMatch[2], personOnObjectOffsetMatch[3])}。`;
+  }
+
+  const womanOnObjectOffsetMatch = clean.match(/^(He|She) was (?:exactly )?one (row|column) (north|south|east|west|above|below) of a woman (?:by|on|at|sitting in|sitting on) (?:a |an |the |some )?(.+)$/i);
+  if (womanOnObjectOffsetMatch) {
+    return `${pronounText(clean)}在某名${gridPlacementTerm(womanOnObjectOffsetMatch[4])}女性的${rowOrColumnText(womanOnObjectOffsetMatch[2], womanOnObjectOffsetMatch[3])}。`;
+  }
+
+  const compoundDirectionMatch = clean.match(/^(He|She) was (north|south|east|west|northeast|northwest|southeast|southwest) of ([^,]+?)(?:, in a different area)? and (north|south|east|west|northeast|northwest|southeast|southwest) of (.+)$/i);
+  if (compoundDirectionMatch) {
+    return `${pronounText(clean)}在 ${compoundDirectionMatch[3]} 的${directionText(compoundDirectionMatch[2])}，且在 ${compoundDirectionMatch[5]} 的${directionText(compoundDirectionMatch[4])}。`;
+  }
+
+  const directionMatch = clean.match(/^(He|She) was (north|south|east|west|northeast|northwest|southeast|southwest) of ([^,]+)(?:, in a different area)?$/i);
+  if (directionMatch) {
+    const differentArea = /different area$/i.test(clean) ? '，且不在同一区域' : '';
+    return `${pronounText(clean)}在 ${directionMatch[3]} 的${directionText(directionMatch[2])}${differentArea}。`;
+  }
+
+  const aloneWithMatch = clean.match(/^(He|She) was alone with (.+)$/i);
+  if (aloneWithMatch) {
+    const normalized = normalizeEnglishTerm(aloneWithMatch[2]);
+    const companion = normalized === 'murderer' ? '凶手' : normalized === 'man' ? '一名男性' : aloneWithMatch[2];
+    return `${pronounText(clean)}和${companion}独处。`;
+  }
+
+  const aloneInRoomMatch = clean.match(/^(He|She) was alone (?:in|inside|on) (?:the )?(.+)$/i);
+  if (aloneInRoomMatch) return `${pronounText(clean)}独自在${roomTerm(aloneInRoomMatch[2])}。`;
+
+  const roomAloneWithWomanMatch = clean.match(/^(He|She) was in (?:the )?(.+) alone with another woman$/i);
+  if (roomAloneWithWomanMatch) return `${pronounText(clean)}在${roomTerm(roomAloneWithWomanMatch[2])}，和另一名女性独处。`;
+
+  const aloneOnRoomWithSomeoneMatch = clean.match(/^(He|She) was alone on (.+) with someone$/i);
+  if (aloneOnRoomWithSomeoneMatch) return `${pronounText(clean)}和另一人在${roomTerm(aloneOnRoomWithSomeoneMatch[2])}独处。`;
+
+  if (/^(He|She) was alone$/i.test(clean)) return `${pronounText(clean)}独处。`;
+
+  if (/^(He|She) was with the outlaw$/i.test(clean)) return `${pronounText(clean)}和法外之徒在同一区域。`;
+  if (/^(He|She) was with someone who was beside a tree$/i.test(clean)) {
+    return `${pronounText(clean)}和一名靠近树的人在同一区域。`;
+  }
+
+  const inRoomWithPersonMatch = clean.match(/^(He|She) was in (?:the )?(.+) with (.+)$/i);
+  if (inRoomWithPersonMatch) {
+    return `${pronounText(clean)}和 ${inRoomWithPersonMatch[2]} 在${roomTerm(inRoomWithPersonMatch[1])}。`;
+  }
+
+  const someoneElseBesideMatch = clean.match(/^Someone else was beside (?:a |an |the |some )?(.+)$/i);
+  if (someoneElseBesideMatch) return `另一个人靠近${objectTerm(someoneElseBesideMatch[1])}。`;
+
+  const someoneDirectionBesideSameMatch = clean.match(/^Someone (north|south|east|west|northeast|northwest|southeast|southwest) of him was beside the same (.+)$/i);
+  if (someoneDirectionBesideSameMatch) {
+    return `他${directionText(someoneDirectionBesideSameMatch[1])}有人靠近同一个${objectTerm(someoneDirectionBesideSameMatch[2])}。`;
+  }
+
+  const thereWomanInCarMatch = clean.match(/^There was a woman inside a car exactly one row (north|south|east|west|above|below) of him$/i);
+  if (thereWomanInCarMatch) return `有一名女性在他${rowOrColumnText('row', thereWomanInCarMatch[1])}的汽车格。`;
+
+  const thereNoPersonAreaMatch = clean.match(/^There was no (man|woman) in (his|her) area$/i);
+  if (thereNoPersonAreaMatch) {
+    const person = thereNoPersonAreaMatch[1].toLowerCase() === 'man' ? '男性' : '女性';
+    return `${areaText(thereNoPersonAreaMatch[2])}没有${person}。`;
+  }
+
+  const thereAtLeastPersonAreaMatch = clean.match(/^There was at least one (man|woman) in (his|her) area$/i);
+  if (thereAtLeastPersonAreaMatch) {
+    const person = thereAtLeastPersonAreaMatch[1].toLowerCase() === 'man' ? '男性' : '女性';
+    return `${areaText(thereAtLeastPersonAreaMatch[2])}至少有一名${person}。`;
+  }
+
+  const therePersonOnObjectAreaMatch = clean.match(/^There was a (man|woman) (?:by|on|at|sitting in|sitting on) (?:a |an |the |some )?(.+) in (his|her) area$/i);
+  if (therePersonOnObjectAreaMatch) {
+    const person = therePersonOnObjectAreaMatch[1].toLowerCase() === 'man' ? '男性' : '女性';
+    return `${areaText(therePersonOnObjectAreaMatch[3])}有一名在${gridPlacementTerm(therePersonOnObjectAreaMatch[2])}的${person}。`;
+  }
+
+  const therePersonInAreaMatch = clean.match(/^There was a (man|woman) in (his|her) area$/i);
+  if (therePersonInAreaMatch) {
+    const person = therePersonInAreaMatch[1].toLowerCase() === 'man' ? '男性' : '女性';
+    return `${areaText(therePersonInAreaMatch[2])}有一名${person}。`;
+  }
+
+  const eitherBesideMatch = clean.match(/^(He|She) was either beside (?:a |an |the |some )?(.+) or (?:a |an |the |some )?(.+)$/i);
+  if (eitherBesideMatch) {
+    return `${pronounText(clean)}靠近${objectTerm(eitherBesideMatch[2])}或${objectTerm(eitherBesideMatch[3])}。`;
+  }
+
+  const roomOrRoomMatch = clean.match(/^(He|She) was in (.+) or (.+)$/i);
+  if (roomOrRoomMatch) return `${pronounText(clean)}在${roomTerm(roomOrRoomMatch[2])}或${roomTerm(roomOrRoomMatch[3])}。`;
+
+  const notRoomMatch = clean.match(/^(He|She) was not (?:in|inside|on) (?:the )?(.+)$/i);
+  if (notRoomMatch) return `${pronounText(clean)}不在${roomTerm(notRoomMatch[2])}。`;
+
+  const roomMatch = clean.match(/^(He|She) was (?:in|inside|on) (?:the )?(.+)$/i);
+  if (roomMatch) return `${pronounText(clean)}在${roomTerm(roomMatch[2])}。`;
 
   if (/^The Victim/i.test(clean)) return clean.replace(/^The Victim/i, '受害者') + '。';
   return clean + '。';
@@ -376,7 +563,8 @@ function translateSimpleClueSentence(sentence: string): string {
 
 function translateClue(clue: string): string {
   return clue
-    .split(/\.\s+|\n+/)
+    .replace(/\s+/g, ' ')
+    .split(/\.\s+/)
     .map(translateSimpleClueSentence)
     .filter(Boolean)
     .join('');

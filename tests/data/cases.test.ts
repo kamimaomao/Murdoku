@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { cases } from '../../src/data/cases';
 import { validateCaseData } from '../../src/data/cases/validateCases';
 import { validateBoard } from '../../src/game/validation';
-import { suspectClues } from '../../src/i18n/zhHans';
+import { caseIntro, caseTitle, objectName, roomName, suspectClues } from '../../src/i18n/zhHans';
+
+const isVisibleText = (value: string | undefined): value is string => Boolean(value);
 
 describe('case data', () => {
   it('contains exactly 20 first-release cases', () => {
@@ -72,6 +74,24 @@ describe('case data', () => {
 
     expect(allClues).not.toMatch(/旁边|边上|旁/);
     expect(suspectClues(cases[0].id, cases[0].suspects[0]).join(' ')).toContain('仙人掌格');
+  });
+
+  it('keeps visible localized text from falling back to English clue wording', () => {
+    const boardLabels = cases.flatMap((caseDef) =>
+      caseDef.cells.flatMap((cell) => [roomName(cell.room), objectName(cell.object)].filter(isVisibleText))
+    );
+    const visibleText = cases.flatMap((caseDef) => [
+      caseTitle(caseDef),
+      caseIntro(caseDef),
+      ...boardLabels,
+      ...caseDef.suspects.flatMap((suspect) => suspectClues(caseDef.id, suspect))
+    ]);
+
+    const englishClueWording =
+      /\b(?:place|using|clues|there|victim|murderer|outlaw|was|were|alone|north|south|east|west|row|column|area|same|exactly|least|only|person|people|man|woman|empty|suspect)\b/i;
+
+    expect(boardLabels.filter((label) => /[A-Za-z]/.test(label))).toEqual([]);
+    expect(visibleText.filter((text) => englishClueWording.test(text))).toEqual([]);
   });
 
   it('keeps localized direct clue text aligned with each solution cell', () => {
