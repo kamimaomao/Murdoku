@@ -1,6 +1,6 @@
 import type { GameState } from './types';
 
-const STORAGE_KEY = 'murdoku-mobile-progress';
+const STORAGE_KEY = 'murdoku-mobile-progress-v2';
 
 export interface CaseProgress {
   state: GameState;

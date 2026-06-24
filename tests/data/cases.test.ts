@@ -30,4 +30,25 @@ describe('case data', () => {
       expect(validateBoard(caseDef, board).solved).toBe(true);
     }
   });
+
+  it('starts with smaller teaching boards before increasing the grid size', () => {
+    expect(cases.map((caseDef) => caseDef.size)).toEqual([
+      { rows: 4, columns: 4 },
+      { rows: 5, columns: 5 },
+      { rows: 6, columns: 6 },
+      { rows: 6, columns: 6 },
+      { rows: 6, columns: 6 },
+      { rows: 7, columns: 7 },
+      { rows: 7, columns: 7 },
+      { rows: 8, columns: 8 },
+      { rows: 8, columns: 8 },
+      { rows: 9, columns: 9 }
+    ]);
+  });
+
+  it('introduces the outlaw concept only in the fifth case', () => {
+    expect(cases.slice(0, 4).map((caseDef) => caseDef.intro).join(' ')).not.toMatch(/outlaw/i);
+    expect(cases[4].intro).toMatch(/outlaw/i);
+    expect(cases[4].intro).toMatch(/may or may not be the murderer/i);
+  });
 });

@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import App from '../src/App';
@@ -13,22 +13,65 @@ describe('App', () => {
     const user = userEvent.setup();
     render(<App />);
 
-    expect(screen.getByRole('heading', { name: /无名之马/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /小镇入口/i })).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /Aldous/i }));
-    await user.click(screen.getByRole('button', { name: /第 5 行第 6 列/i }));
+    await user.click(screen.getByRole('button', { name: /第 4 行第 4 列/i }));
 
-    expect(screen.getByRole('button', { name: /第 5 行第 6 列.*Aldous/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /第 4 行第 4 列.*Aldous/i })).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /标记不可用/i }));
-    await user.click(screen.getByRole('button', { name: /第 5 行第 6 列/i }));
+    await user.click(screen.getByRole('button', { name: /第 4 行第 4 列/i }));
 
-    expect(screen.getByRole('button', { name: /第 5 行第 6 列.*已标记/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /第 4 行第 4 列.*已标记/i })).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /擦除/i }));
-    await user.click(screen.getByRole('button', { name: /第 5 行第 6 列/i }));
+    await user.click(screen.getByRole('button', { name: /第 4 行第 4 列/i }));
 
-    expect(screen.getByRole('button', { name: /^第 5 行第 6 列$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^第 4 行第 4 列$/i })).toBeInTheDocument();
+  });
+
+  it('removes a placed suspect when tapping their board cell again', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: /Aldous/i }));
+    await user.click(screen.getByRole('button', { name: /第 4 行第 4 列/i }));
+    await user.click(screen.getByRole('button', { name: /第 4 行第 4 列.*Aldous/i }));
+
+    expect(screen.getByRole('button', { name: /^第 4 行第 4 列$/i })).toBeInTheDocument();
+  });
+
+  it('uses a hint to confirm the selected suspect position', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: /Aldous/i }));
+    await user.click(screen.getByRole('button', { name: /提示/i }));
+
+    const placement = cases[0].solution.find((candidate) => candidate.suspectId === 'a-aldous');
+    expect(placement).toBeDefined();
+    const [row, column] = placement!.cellId.split('-').map(Number);
+    expect(
+      screen.getByRole('button', { name: new RegExp(`第 ${row + 1} 行第 ${column + 1} 列.*Aldous`, 'i') })
+    ).toBeInTheDocument();
+  });
+
+  it('moves a placed suspect by dragging from one board cell to another', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: /Aldous/i }));
+    await user.click(screen.getByRole('button', { name: /^第 4 行第 4 列$/i }));
+
+    const source = screen.getByRole('button', { name: /第 4 行第 4 列.*Aldous/i });
+    const target = screen.getByRole('button', { name: /^第 1 行第 1 列$/i });
+
+    fireEvent.pointerDown(source, { clientX: 120, clientY: 120 });
+    fireEvent.pointerUp(target, { clientX: 20, clientY: 20 });
+
+    expect(screen.getByRole('button', { name: /第 1 行第 1 列.*Aldous/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^第 4 行第 4 列$/i })).toBeInTheDocument();
   });
 
   it('renders licensed reference assets when available', () => {
@@ -43,12 +86,13 @@ describe('App', () => {
     render(<App />);
 
     const desertCorner = screen.getByRole('button', { name: /^第 1 行第 1 列$/i });
-    const canyonStart = screen.getByRole('button', { name: /^第 1 行第 2 列$/i });
-    const canyonNeighbor = screen.getByRole('button', { name: /^第 1 行第 3 列$/i });
+    const desertNeighbor = screen.getByRole('button', { name: /^第 1 行第 2 列$/i });
+    const canyonStart = screen.getByRole('button', { name: /^第 1 行第 3 列$/i });
+    const canyonNeighbor = screen.getByRole('button', { name: /^第 1 行第 4 列$/i });
 
     expect(desertCorner).toHaveClass('room-edge-n');
     expect(desertCorner).toHaveClass('room-edge-w');
-    expect(desertCorner).toHaveClass('room-edge-e');
+    expect(desertNeighbor).toHaveClass('room-edge-e');
     expect(canyonStart).toHaveClass('room-edge-w');
     expect(canyonStart).not.toHaveClass('room-edge-e');
     expect(canyonNeighbor).not.toHaveClass('room-edge-w');
@@ -72,7 +116,7 @@ describe('App', () => {
     const { container } = render(<App />);
 
     await user.click(screen.getByRole('button', { name: /Aldous/i }));
-    await user.click(screen.getByRole('button', { name: /第 5 行第 6 列/i }));
+    await user.click(screen.getByRole('button', { name: /第 4 行第 4 列/i }));
 
     expect(container.querySelector('.cell-suspect-photo')).toHaveAttribute(
       'src',
@@ -97,8 +141,9 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: /结案/i }));
 
     const result = screen.getByRole('status');
+    const murderer = firstCase.suspects.find((suspect) => suspect.id === firstCase.murdererId);
     expect(result).toHaveTextContent(/案件已结/i);
-    expect(within(result).getByText(/Dahlia/i)).toBeInTheDocument();
+    expect(within(result).getByText(new RegExp(murderer!.name, 'i'))).toBeInTheDocument();
   });
 
   it('keeps a closed case closed after non-board actions and reload', async () => {

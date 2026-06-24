@@ -8,11 +8,37 @@ const page = await browser.newPage({
 });
 
 try {
+  await page.addInitScript(() => window.localStorage.clear());
   await page.goto(targetUrl, { waitUntil: 'load' });
-  await page.getByRole('heading', { name: '无名之马' }).waitFor();
+  await page.getByRole('heading', { name: '小镇入口' }).waitFor();
+
   await page.getByRole('button', { name: 'Aldous' }).click();
-  await page.getByRole('button', { name: '第 5 行第 6 列' }).click();
-  await page.getByRole('button', { name: '第 5 行第 6 列，Aldous' }).waitFor();
+  await page.getByRole('button', { name: '第 4 行第 4 列' }).click();
+  await page.getByRole('button', { name: '第 4 行第 4 列，Aldous' }).waitFor();
+
+  const source = page.getByRole('button', { name: '第 4 行第 4 列，Aldous' });
+  const target = page.getByRole('button', { name: '第 1 行第 1 列' });
+  const sourceBox = await source.boundingBox();
+  const targetBox = await target.boundingBox();
+
+  if (!sourceBox || !targetBox) {
+    throw new Error('Unable to locate board cells for drag smoke test.');
+  }
+
+  await page.mouse.move(sourceBox.x + sourceBox.width / 2, sourceBox.y + sourceBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2, { steps: 8 });
+  await page.mouse.up();
+  await page.getByRole('button', { name: '第 1 行第 1 列，Aldous' }).waitFor();
+
+  await page.getByRole('button', { name: '第 1 行第 1 列，Aldous' }).click();
+  await page.getByRole('button', { name: '第 1 行第 1 列' }).waitFor();
+
+  await page.getByRole('button', { name: 'Aldous' }).click();
+  await page.getByRole('button', { name: '提示' }).click();
+  await page.getByRole('button', { name: '第 2 行第 2 列，Aldous' }).waitFor();
+  await page.getByText('Aldous的位置已确认。').waitFor();
+
   await page.screenshot({ path: 'tests/smoke/mobile-smoke.png', fullPage: false });
 } finally {
   await browser.close();

@@ -29,4 +29,13 @@ describe('progress storage', () => {
 
     expect(loadProgress()).toEqual({ cases: {} });
   });
+
+  it('ignores legacy progress from the previous case layout', () => {
+    localStorage.setItem(
+      'murdoku-mobile-progress',
+      JSON.stringify({ cases: { 'case-01': { state: createInitialGameState('case-01'), completed: true } } })
+    );
+
+    expect(loadProgress()).toEqual({ cases: {} });
+  });
 });

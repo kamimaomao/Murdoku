@@ -228,6 +228,8 @@ h2 {
 
 .board-cell.occupied {
   outline: 2px solid var(--accent, var(--accent-2));
+  cursor: grab;
+  touch-action: none;
 }
 
 .board-cell.marked {

@@ -1,7 +1,7 @@
-import { type CSSProperties, useMemo, useState } from 'react';
+import { type CSSProperties, type DragEvent, type PointerEvent, useMemo, useRef, useState } from 'react';
 import { murdokuLogo, objectAssetFor, roomVisualFor, suspectPortraitFor } from './assets/murdokuAssets';
 import { cases, casesById } from './data/cases';
-import { applyCellAction, createInitialGameState, selectSuspect, setTool, undo } from './game/board';
+import { applyCellAction, applyHint, createInitialGameState, moveSuspect, selectSuspect, setTool, undo } from './game/board';
 import { loadProgress, saveProgress, type ProgressState } from './game/storage';
 import type { BoardState, CaseDefinition, CellDefinition, GameState, Suspect, Tool, ValidationResult } from './game/types';
 import { validateBoard } from './game/validation';
@@ -58,11 +58,21 @@ function firstSavedGame(progress: ProgressState): GameState {
   return progress.cases[cases[0].id]?.state ?? createInitialGameState(cases[0].id);
 }
 
+interface DragIntent {
+  suspectId: string;
+  sourceCellId: CellDefinition['id'];
+  startX: number;
+  startY: number;
+}
+
 export default function App() {
   const [progress, setProgress] = useState<ProgressState>(() => loadProgress());
   const [game, setGame] = useState<GameState>(() => firstSavedGame(loadProgress()));
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [revealedCellId, setRevealedCellId] = useState<CellDefinition['id'] | undefined>();
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const dragIntentRef = useRef<DragIntent | null>(null);
+  const skipNextClickRef = useRef(false);
   const currentCase = casesById[game.caseId] ?? cases[0];
   const selectedSuspect = currentCase.suspects.find((suspect) => suspect.id === game.selectedSuspectId);
   const selectedPortrait = suspectPortraitFor(selectedSuspect);
@@ -98,6 +108,7 @@ export default function App() {
     persist(nextGame, boardChanged ? false : undefined);
     if (clearResult && boardChanged) {
       setValidation(null);
+      setStatusMessage(null);
     }
   }
 
@@ -106,6 +117,7 @@ export default function App() {
     setGame(saved ?? createInitialGameState(caseId));
     setValidation(null);
     setRevealedCellId(undefined);
+    setStatusMessage(null);
   }
 
   function submitAccusation() {
@@ -123,8 +135,58 @@ export default function App() {
   }
 
   function handleCellClick(cellId: CellDefinition['id']) {
+    if (skipNextClickRef.current) {
+      skipNextClickRef.current = false;
+      return;
+    }
     setRevealedCellId(cellId);
     updateGame(applyCellAction(game, cellId));
+  }
+
+  function handleCellPointerDown(event: PointerEvent<HTMLButtonElement>, cellId: CellDefinition['id'], suspect: Suspect | undefined) {
+    if (!suspect) return;
+    dragIntentRef.current = {
+      suspectId: suspect.id,
+      sourceCellId: cellId,
+      startX: event.clientX,
+      startY: event.clientY
+    };
+  }
+
+  function handleCellPointerUp(event: PointerEvent<HTMLButtonElement>, cellId: CellDefinition['id']) {
+    const intent = dragIntentRef.current;
+    dragIntentRef.current = null;
+    if (!intent || intent.sourceCellId === cellId) return;
+
+    const movedEnough = Math.hypot(event.clientX - intent.startX, event.clientY - intent.startY) > 8;
+    if (!movedEnough) return;
+
+    skipNextClickRef.current = true;
+    setRevealedCellId(cellId);
+    updateGame(moveSuspect(game, intent.suspectId, cellId));
+  }
+
+  function handleCellDragStart(event: DragEvent<HTMLButtonElement>, suspect: Suspect | undefined) {
+    if (!suspect) return;
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', suspect.id);
+  }
+
+  function handleCellDrop(event: DragEvent<HTMLButtonElement>, cellId: CellDefinition['id']) {
+    event.preventDefault();
+    const suspectId = event.dataTransfer.getData('text/plain');
+    if (!suspectId || !currentCase.suspects.some((suspect) => suspect.id === suspectId)) return;
+    setRevealedCellId(cellId);
+    updateGame(moveSuspect(game, suspectId, cellId));
+  }
+
+  function confirmSelectedPosition() {
+    if (!selectedSuspect) {
+      setStatusMessage(uiText.chooseSuspectForHint);
+      return;
+    }
+    updateGame(applyHint(currentCase, game));
+    setStatusMessage(`${selectedSuspect.name}${uiText.hintConfirmed}`);
   }
 
   return (
@@ -185,8 +247,14 @@ export default function App() {
             <button
               aria-label={cellLabel(cell, suspect, marked)}
               className={cellClass}
+              draggable={Boolean(suspect)}
               key={cell.id}
               onClick={() => handleCellClick(cell.id)}
+              onDragOver={(event) => event.preventDefault()}
+              onDragStart={(event) => handleCellDragStart(event, suspect)}
+              onDrop={(event) => handleCellDrop(event, cell.id)}
+              onPointerDown={(event) => handleCellPointerDown(event, cell.id, suspect)}
+              onPointerUp={(event) => handleCellPointerUp(event, cell.id)}
               style={{ '--accent': suspect?.accent } as CSSProperties}
               type="button"
             >
@@ -263,13 +331,20 @@ export default function App() {
         <button className="tool-button" disabled={game.undoStack.length === 0} onClick={() => updateGame(undo(game))} type="button">
           {uiText.undo}
         </button>
+        <button className="tool-button" onClick={confirmSelectedPosition} type="button">
+          {uiText.hint}
+        </button>
         <button className="accuse-button" onClick={submitAccusation} type="button">
           {uiText.accuse}
         </button>
       </footer>
 
       <section className={validation?.solved || completed ? 'result solved' : 'result'} role="status" aria-live="polite">
-        {validation ? issueText(validation) : completed ? uiText.caseClosed : `${toolLabel(game.activeTool)}${uiText.modeSuffix}`}
+        {validation
+          ? issueText(validation)
+          : completed
+            ? uiText.caseClosed
+            : statusMessage ?? `${toolLabel(game.activeTool)}${uiText.modeSuffix}`}
       </section>
     </main>
   );

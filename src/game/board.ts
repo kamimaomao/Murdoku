@@ -1,4 +1,4 @@
-import type { BoardState, CellId, GameState, Tool } from './types';
+import type { BoardState, CaseDefinition, CellId, GameState, SuspectId, Tool } from './types';
 
 const emptyBoard = (): BoardState => ({
   placements: {},
@@ -31,6 +31,14 @@ export function applyCellAction(state: GameState, cellId: CellId): GameState {
   const board = cloneBoard(state.board);
 
   if (state.activeTool === 'place') {
+    if (board.placements[cellId]) {
+      delete board.placements[cellId];
+      return {
+        ...state,
+        board,
+        undoStack: [...state.undoStack, cloneBoard(state.board)]
+      };
+    }
     if (!state.selectedSuspectId) return state;
     for (const [placedCellId, suspectId] of Object.entries(board.placements)) {
       if (suspectId === state.selectedSuspectId) {
@@ -56,6 +64,31 @@ export function applyCellAction(state: GameState, cellId: CellId): GameState {
     board,
     undoStack: [...state.undoStack, cloneBoard(state.board)]
   };
+}
+
+export function moveSuspect(state: GameState, suspectId: SuspectId, targetCellId: CellId): GameState {
+  const board = cloneBoard(state.board);
+
+  for (const [placedCellId, placedSuspectId] of Object.entries(board.placements)) {
+    if (placedSuspectId === suspectId) {
+      delete board.placements[placedCellId as CellId];
+    }
+  }
+
+  board.placements[targetCellId] = suspectId;
+  delete board.marks[targetCellId];
+
+  return {
+    ...state,
+    board,
+    undoStack: [...state.undoStack, cloneBoard(state.board)]
+  };
+}
+
+export function applyHint(caseDef: CaseDefinition, state: GameState): GameState {
+  if (!state.selectedSuspectId) return state;
+  const placement = caseDef.solution.find((candidate) => candidate.suspectId === state.selectedSuspectId);
+  return placement ? moveSuspect(state, state.selectedSuspectId, placement.cellId) : state;
 }
 
 export function undo(state: GameState): GameState {
