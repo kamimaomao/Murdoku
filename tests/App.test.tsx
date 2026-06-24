@@ -194,6 +194,19 @@ describe('App', () => {
     expect(new Set(portraitVariants).size).toBeGreaterThan(1);
   });
 
+  it('uses a broad portrait palette in crowded cases', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<App />);
+
+    await user.click(screen.getByRole('button', { name: /20困难/i }));
+    await user.click(screen.getByRole('button', { name: /答案/i }));
+
+    const portraitVariants = Array.from(container.querySelectorAll('.cell-suspect-photo')).map((photo) =>
+      Array.from(photo.classList).find((className) => className.startsWith('portrait-variant-'))
+    );
+    expect(new Set(portraitVariants).size).toBeGreaterThanOrEqual(8);
+  });
+
   it('closes the case when all suspects match the solution', async () => {
     const user = userEvent.setup();
     const firstCase = cases[0];

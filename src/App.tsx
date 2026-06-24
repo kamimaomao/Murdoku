@@ -51,7 +51,7 @@ function cellPositionKey(row: number, column: number): string {
 function portraitVariantClass(caseDef: CaseDefinition, suspect: Suspect | undefined): string {
   if (!suspect) return '';
   const suspectIndex = caseDef.suspects.findIndex((candidate) => candidate.id === suspect.id);
-  return `portrait-variant-${Math.max(suspectIndex, 0) % 5}`;
+  return `portrait-variant-${Math.max(suspectIndex, 0) % 10}`;
 }
 
 function roomEdgeClasses(cell: CellDefinition, cellsByPosition: Map<string, CellDefinition>): string[] {
@@ -310,7 +310,12 @@ export default function App() {
       <section className="clue-panel" aria-label={uiText.clues}>
         <div className="selected-row">
           {selectedPortrait ? (
-            <img className="avatar portrait-avatar" src={selectedPortrait} alt="" aria-hidden="true" />
+            <img
+              className={`avatar portrait-avatar ${portraitVariantClass(currentCase, selectedSuspect)}`}
+              src={selectedPortrait}
+              alt=""
+              aria-hidden="true"
+            />
           ) : (
             <div className="avatar" style={{ '--accent': selectedSuspect?.accent } as CSSProperties}>
               ?

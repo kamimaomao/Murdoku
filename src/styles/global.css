@@ -336,53 +336,134 @@ h2 {
   --portrait-radius: 4px;
   --portrait-hue: 0deg;
   --portrait-saturation: 1.08;
+  --portrait-contrast: 1.08;
+  --portrait-frame: #fff2dc;
   position: absolute;
   inset: 50% auto auto 50%;
   z-index: 5;
   width: 88%;
   height: 96%;
-  border: 3px solid var(--accent, #fff2dc);
+  border: 3px solid var(--portrait-frame);
   border-radius: var(--portrait-radius);
   background: #fff2dc;
-  box-shadow: 0 2px 0 rgba(34, 24, 19, 0.72), 0 4px 8px rgba(29, 20, 15, 0.34);
+  box-shadow:
+    0 2px 0 rgba(34, 24, 19, 0.72),
+    0 0 0 1px rgba(255, 242, 220, 0.5),
+    0 4px 8px rgba(29, 20, 15, 0.34);
   object-fit: cover;
   pointer-events: none;
-  filter: saturate(var(--portrait-saturation)) hue-rotate(var(--portrait-hue));
+  filter: saturate(var(--portrait-saturation)) contrast(var(--portrait-contrast)) hue-rotate(var(--portrait-hue));
   transform: translate(-50%, -50%) rotate(var(--portrait-rotate)) scale(var(--portrait-scale));
 }
 
+.portrait-variant-0 {
+  --portrait-rotate: -7deg;
+  --portrait-scale: 1.05;
+  --portrait-active-scale: 1.11;
+  --portrait-radius: 3px;
+  --portrait-hue: -24deg;
+  --portrait-saturation: 1.34;
+  --portrait-contrast: 1.1;
+  --portrait-frame: #f05a4f;
+}
+
 .portrait-variant-1 {
-  --portrait-rotate: 5deg;
-  --portrait-scale: 0.96;
-  --portrait-active-scale: 1.02;
-  --portrait-radius: 10px;
-  --portrait-hue: 7deg;
+  --portrait-rotate: 6deg;
+  --portrait-scale: 0.94;
+  --portrait-active-scale: 1.01;
+  --portrait-radius: 12px;
+  --portrait-hue: 42deg;
+  --portrait-saturation: 1.42;
+  --portrait-contrast: 1.12;
+  --portrait-frame: #28c2a0;
 }
 
 .portrait-variant-2 {
-  --portrait-rotate: -9deg;
-  --portrait-scale: 1.03;
-  --portrait-active-scale: 1.09;
+  --portrait-rotate: -11deg;
+  --portrait-scale: 1.02;
+  --portrait-active-scale: 1.08;
   --portrait-radius: 2px;
-  --portrait-hue: -8deg;
+  --portrait-hue: 92deg;
+  --portrait-saturation: 1.45;
+  --portrait-contrast: 1.12;
+  --portrait-frame: #4b8cff;
 }
 
 .portrait-variant-3 {
-  --portrait-rotate: 8deg;
-  --portrait-scale: 0.92;
+  --portrait-rotate: 10deg;
+  --portrait-scale: 0.91;
   --portrait-active-scale: 0.99;
-  --portrait-radius: 14px;
-  --portrait-hue: 14deg;
-  --portrait-saturation: 1.18;
+  --portrait-radius: 16px;
+  --portrait-hue: 158deg;
+  --portrait-saturation: 1.5;
+  --portrait-contrast: 1.08;
+  --portrait-frame: #f4b840;
 }
 
 .portrait-variant-4 {
-  --portrait-rotate: -2deg;
-  --portrait-scale: 1.08;
-  --portrait-active-scale: 1.13;
+  --portrait-rotate: -3deg;
+  --portrait-scale: 1.1;
+  --portrait-active-scale: 1.16;
   --portrait-radius: 7px;
-  --portrait-hue: -14deg;
-  --portrait-saturation: 1.16;
+  --portrait-hue: -78deg;
+  --portrait-saturation: 1.46;
+  --portrait-contrast: 1.12;
+  --portrait-frame: #b66cff;
+}
+
+.portrait-variant-5 {
+  --portrait-rotate: 3deg;
+  --portrait-scale: 0.98;
+  --portrait-active-scale: 1.06;
+  --portrait-radius: 4px;
+  --portrait-hue: 212deg;
+  --portrait-saturation: 1.4;
+  --portrait-contrast: 1.11;
+  --portrait-frame: #ef5da8;
+}
+
+.portrait-variant-6 {
+  --portrait-rotate: -13deg;
+  --portrait-scale: 0.95;
+  --portrait-active-scale: 1.03;
+  --portrait-radius: 14px;
+  --portrait-hue: -132deg;
+  --portrait-saturation: 1.5;
+  --portrait-contrast: 1.1;
+  --portrait-frame: #7fd957;
+}
+
+.portrait-variant-7 {
+  --portrait-rotate: 12deg;
+  --portrait-scale: 1.04;
+  --portrait-active-scale: 1.11;
+  --portrait-radius: 5px;
+  --portrait-hue: 126deg;
+  --portrait-saturation: 1.46;
+  --portrait-contrast: 1.12;
+  --portrait-frame: #ff7a33;
+}
+
+.portrait-variant-8 {
+  --portrait-rotate: -5deg;
+  --portrait-scale: 0.9;
+  --portrait-active-scale: 0.98;
+  --portrait-radius: 18px;
+  --portrait-hue: -190deg;
+  --portrait-saturation: 1.55;
+  --portrait-contrast: 1.08;
+  --portrait-frame: #39c7f4;
+}
+
+.portrait-variant-9 {
+  --portrait-rotate: 8deg;
+  --portrait-scale: 1.09;
+  --portrait-active-scale: 1.15;
+  --portrait-radius: 9px;
+  --portrait-hue: 70deg;
+  --portrait-saturation: 1.38;
+  --portrait-contrast: 1.12;
+  --portrait-frame: #d9d04f;
 }
 
 .board-cell.selected-suspect .cell-suspect-photo {
@@ -437,7 +518,7 @@ h2 {
   display: block;
   background: #fff2dc;
   border-radius: var(--portrait-radius, 7px);
-  filter: saturate(var(--portrait-saturation, 1.08)) hue-rotate(var(--portrait-hue, 0deg));
+  filter: saturate(var(--portrait-saturation, 1.08)) contrast(var(--portrait-contrast, 1.08)) hue-rotate(var(--portrait-hue, 0deg));
   object-fit: cover;
 }
 
@@ -469,6 +550,7 @@ h2 {
 .suspect-token .avatar {
   width: 30px;
   height: 30px;
+  border-color: var(--portrait-frame, rgba(255, 255, 255, 0.7));
   border-width: 1px;
   border-radius: 5px;
 }
