@@ -1,7 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <ellipse cx="33" cy="52" rx="24" ry="6" fill="#342d2b" opacity=".28"/>
-  <path d="M10 42c0-12 8-24 20-24 5-7 18-3 20 6 7 4 8 17 0 24-9 7-31 8-40-6z" fill="#211c1a"/>
-  <path d="M15 39c0-8 7-17 16-18 3-5 13-3 15 4 5 3 6 13 0 18-7 6-24 7-31-4z" fill="#8f8d80"/>
-  <path d="M21 36c4-8 12-11 21-9M33 23c-3 5-4 10-2 17M43 33c-4 1-7 3-10 8" fill="none" stroke="#59554f" stroke-width="3" stroke-linecap="round"/>
-  <path d="M20 30c3-3 6-5 10-5" fill="none" stroke="#c6c2ad" stroke-width="2" stroke-linecap="round"/>
+  <ellipse cx="33" cy="53" rx="25" ry="6" fill="#1b1512" opacity=".28"/>
+  <path d="M8 41c-2-9 4-17 13-20 3-8 12-12 21-8 8 1 15 9 14 18 5 6 2 16-6 20-11 7-34 5-42-10z" fill="#14100e"/>
+  <path d="M13 39c-1-7 4-13 11-15 3-6 10-9 17-6 6 1 11 7 10 14 4 5 1 12-5 15-9 5-27 4-33-8z" fill="#928c7c"/>
+  <path d="M18 37c2-7 9-12 17-14" fill="none" stroke="#c6bfaa" stroke-width="4" stroke-linecap="round"/>
+  <path d="M42 20c4 2 7 6 7 11" fill="none" stroke="#c0b8a4" stroke-width="3" stroke-linecap="round"/>
+  <path d="M21 46c9 4 21 3 27-2" fill="none" stroke="#5f5a50" stroke-width="4" stroke-linecap="round"/>
+  <path d="M26 24c-2 6-2 11 1 17M38 19c-1 8 1 14 6 19M18 35c7-1 14 0 20 4" fill="none" stroke="#5b554d" stroke-width="3" stroke-linecap="round"/>
+  <path d="M15 33l5-2 3 4-4 4-5-1zM33 17l6 2-2 5-6-1zM43 36l7 2-3 6-6-1z" fill="#777166" opacity=".9"/>
+  <circle cx="25" cy="31" r="2" fill="#d6cfba" opacity=".72"/>
+  <circle cx="36" cy="27" r="1.5" fill="#d6cfba" opacity=".6"/>
+  <circle cx="47" cy="34" r="1.7" fill="#3f3a35" opacity=".55"/>
+  <path d="M12 41c8 8 27 10 40 1" fill="none" stroke="#211a16" stroke-width="2" opacity=".65"/>
+  <path d="M27 45l4-4 5 3" fill="none" stroke="#4a4640" stroke-width="2" stroke-linecap="round"/>
+  <path d="M39 29l5-2" stroke="#c8c0ad" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+  <circle cx="18" cy="40" r="1.5" fill="#6f685f"/>
+  <circle cx="31" cy="48" r="1.2" fill="#c7beaa" opacity=".55"/>
 </svg>
