@@ -30,6 +30,11 @@ function vectorPrimitiveCount(assetUrl: string): number {
   return String(source ?? '').match(/<(path|ellipse|circle|rect|polygon)\b/g)?.length ?? 0;
 }
 
+function primaryTextureColor(room: string): string {
+  const source = String(publicTextureRawAssets[`/public${roomVisualFor(room).textureAsset}`] ?? '');
+  return source.match(/<rect\b[^>]*\sfill="(#[0-9a-fA-F]{3,6})"/)?.[1].toLowerCase() ?? '';
+}
+
 describe('murdoku reference art assets', () => {
   it('maps every case object to an existing cell icon', () => {
     const objects = new Set(cases.flatMap((caseDef) => caseDef.cells.map((cell) => cell.object).filter(Boolean)));
@@ -71,6 +76,26 @@ describe('murdoku reference art assets', () => {
     expect(pathTexture).not.toBe(walkwayTexture);
     expect(pathTexture).not.toBe(entranceTexture);
     expect(walkwayTexture).not.toBe(entranceTexture);
+  });
+
+  it('keeps every named room from sharing the same primary terrain color', () => {
+    const rooms = Array.from(
+      new Set(
+        cases.flatMap((caseDef) =>
+          caseDef.cells.map((cell) => cell.room).filter((room): room is string => Boolean(room))
+        )
+      )
+    );
+    const roomsByColor = new Map<string, string[]>();
+
+    for (const room of rooms) {
+      const color = primaryTextureColor(room);
+      expect(color, room).toMatch(/^#[0-9a-f]{6}$/);
+      roomsByColor.set(color, [...(roomsByColor.get(color) ?? []), room]);
+    }
+
+    const duplicates = Array.from(roomsByColor.entries()).filter(([, colorRooms]) => colorRooms.length > 1);
+    expect(duplicates).toEqual([]);
   });
 
   it('maps every suspect to an existing portrait image', () => {

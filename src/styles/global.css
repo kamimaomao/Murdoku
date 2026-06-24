@@ -257,7 +257,17 @@ h2 {
   text-overflow: ellipsis;
   white-space: nowrap;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+  opacity: 0;
+  transition: opacity 120ms ease;
+  visibility: hidden;
   z-index: 4;
+}
+
+.board-cell.labels-revealed .cell-room,
+.board-cell.labels-revealed .cell-object {
+  opacity: 1;
+  visibility: visible;
+  z-index: 7;
 }
 
 .cell-room {

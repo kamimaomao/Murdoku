@@ -54,6 +54,19 @@ describe('App', () => {
     expect(canyonNeighbor).not.toHaveClass('room-edge-w');
   });
 
+  it('keeps board labels hidden until a cell is tapped', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<App />);
+    const firstCell = screen.getByRole('button', { name: /^第 1 行第 1 列$/i });
+
+    expect(container.querySelectorAll('.board-cell.labels-revealed')).toHaveLength(0);
+
+    await user.click(firstCell);
+
+    expect(firstCell).toHaveClass('labels-revealed');
+    expect(container.querySelectorAll('.board-cell.labels-revealed')).toHaveLength(1);
+  });
+
   it('renders suspect portraits on the board after placement', async () => {
     const user = userEvent.setup();
     const { container } = render(<App />);

@@ -62,6 +62,7 @@ export default function App() {
   const [progress, setProgress] = useState<ProgressState>(() => loadProgress());
   const [game, setGame] = useState<GameState>(() => firstSavedGame(loadProgress()));
   const [validation, setValidation] = useState<ValidationResult | null>(null);
+  const [revealedCellId, setRevealedCellId] = useState<CellDefinition['id'] | undefined>();
   const currentCase = casesById[game.caseId] ?? cases[0];
   const selectedSuspect = currentCase.suspects.find((suspect) => suspect.id === game.selectedSuspectId);
   const selectedPortrait = suspectPortraitFor(selectedSuspect);
@@ -104,6 +105,7 @@ export default function App() {
     const saved = progress.cases[caseId]?.state;
     setGame(saved ?? createInitialGameState(caseId));
     setValidation(null);
+    setRevealedCellId(undefined);
   }
 
   function submitAccusation() {
@@ -118,6 +120,11 @@ export default function App() {
       return `${uiText.caseClosed}${uiText.murdererPrefix} ${murderer}。`;
     }
     return zhIssueText(result.issues[0]);
+  }
+
+  function handleCellClick(cellId: CellDefinition['id']) {
+    setRevealedCellId(cellId);
+    updateGame(applyCellAction(game, cellId));
   }
 
   return (
@@ -167,6 +174,7 @@ export default function App() {
             'board-cell',
             roomVisual.className,
             ...roomEdgeClasses(cell, cellsByPosition),
+            revealedCellId === cell.id ? 'labels-revealed' : '',
             objectAsset ? 'has-object' : '',
             suspect ? 'occupied' : marked ? 'marked' : ''
           ]
@@ -178,7 +186,7 @@ export default function App() {
               aria-label={cellLabel(cell, suspect, marked)}
               className={cellClass}
               key={cell.id}
-              onClick={() => updateGame(applyCellAction(game, cell.id))}
+              onClick={() => handleCellClick(cell.id)}
               style={{ '--accent': suspect?.accent } as CSSProperties}
               type="button"
             >
