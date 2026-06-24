@@ -159,7 +159,7 @@ h2 {
 
 .board {
   display: grid;
-  gap: 3px;
+  gap: 1px;
   width: 100%;
   aspect-ratio: 1;
   padding: 7px;
@@ -170,6 +170,10 @@ h2 {
 }
 
 .board-cell {
+  --room-wall-n: transparent;
+  --room-wall-e: transparent;
+  --room-wall-s: transparent;
+  --room-wall-w: transparent;
   position: relative;
   display: grid;
   min-width: 0;
@@ -191,6 +195,35 @@ h2 {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(77, 52, 31, 0.14));
   opacity: 0.52;
   pointer-events: none;
+}
+
+.board-cell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background:
+    linear-gradient(var(--room-wall-n), var(--room-wall-n)) top / 100% 3px no-repeat,
+    linear-gradient(var(--room-wall-e), var(--room-wall-e)) right / 3px 100% no-repeat,
+    linear-gradient(var(--room-wall-s), var(--room-wall-s)) bottom / 100% 3px no-repeat,
+    linear-gradient(var(--room-wall-w), var(--room-wall-w)) left / 3px 100% no-repeat;
+  pointer-events: none;
+}
+
+.board-cell.room-edge-n {
+  --room-wall-n: #19120e;
+}
+
+.board-cell.room-edge-e {
+  --room-wall-e: #19120e;
+}
+
+.board-cell.room-edge-s {
+  --room-wall-s: #19120e;
+}
+
+.board-cell.room-edge-w {
+  --room-wall-w: #19120e;
 }
 
 .board-cell.occupied {
@@ -224,7 +257,7 @@ h2 {
   text-overflow: ellipsis;
   white-space: nowrap;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
-  z-index: 3;
+  z-index: 4;
 }
 
 .cell-room {
@@ -277,7 +310,7 @@ h2 {
 .cell-suspect-photo {
   position: absolute;
   inset: 50% auto auto 50%;
-  z-index: 4;
+  z-index: 5;
   width: 84%;
   height: 92%;
   border: 2px solid #fff2dc;
@@ -293,7 +326,7 @@ h2 {
   border-color: rgba(255, 255, 255, 0.45);
   background: var(--danger);
   color: #260c0c;
-  z-index: 5;
+  z-index: 6;
 }
 
 .clue-panel {

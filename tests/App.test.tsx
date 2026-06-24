@@ -39,6 +39,21 @@ describe('App', () => {
     expect(container.querySelector('.cell-terrain-art')).toHaveAttribute('src', '/murdoku-assets/textures/room_desert.svg');
   });
 
+  it('draws room walls only where adjacent cells belong to different rooms', () => {
+    render(<App />);
+
+    const desertCorner = screen.getByRole('button', { name: /^第 1 行第 1 列$/i });
+    const canyonStart = screen.getByRole('button', { name: /^第 1 行第 2 列$/i });
+    const canyonNeighbor = screen.getByRole('button', { name: /^第 1 行第 3 列$/i });
+
+    expect(desertCorner).toHaveClass('room-edge-n');
+    expect(desertCorner).toHaveClass('room-edge-w');
+    expect(desertCorner).toHaveClass('room-edge-e');
+    expect(canyonStart).toHaveClass('room-edge-w');
+    expect(canyonStart).not.toHaveClass('room-edge-e');
+    expect(canyonNeighbor).not.toHaveClass('room-edge-w');
+  });
+
   it('renders suspect portraits on the board after placement', async () => {
     const user = userEvent.setup();
     const { container } = render(<App />);

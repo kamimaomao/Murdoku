@@ -6,6 +6,11 @@ import type { Suspect } from '../../src/game/types';
 const publicSvgAssets = import.meta.glob('/public/murdoku-assets/*.svg', { eager: true, query: '?url', import: 'default' });
 const publicSvgRawAssets = import.meta.glob('/public/murdoku-assets/*.svg', { eager: true, query: '?raw', import: 'default' });
 const publicTextureAssets = import.meta.glob('/public/murdoku-assets/textures/*.svg', { eager: true, query: '?url', import: 'default' });
+const publicTextureRawAssets = import.meta.glob('/public/murdoku-assets/textures/*.svg', {
+  eager: true,
+  query: '?raw',
+  import: 'default'
+});
 const publicPortraitAssets = import.meta.glob('/public/murdoku-assets/portraits/*.svg', { eager: true, query: '?url', import: 'default' });
 
 function publicAssetExists(assetUrl: string): boolean {
@@ -56,6 +61,16 @@ describe('murdoku reference art assets', () => {
     }
 
     expect(textureAssets.size).toBe(rooms.size);
+  });
+
+  it('keeps path, walkway, and entrance textures visually separate', () => {
+    const pathTexture = publicTextureRawAssets[`/public${roomVisualFor('Path').textureAsset}`];
+    const walkwayTexture = publicTextureRawAssets[`/public${roomVisualFor('Walkway').textureAsset}`];
+    const entranceTexture = publicTextureRawAssets[`/public${roomVisualFor('Entrance').textureAsset}`];
+
+    expect(pathTexture).not.toBe(walkwayTexture);
+    expect(pathTexture).not.toBe(entranceTexture);
+    expect(walkwayTexture).not.toBe(entranceTexture);
   });
 
   it('maps every suspect to an existing portrait image', () => {

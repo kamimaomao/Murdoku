@@ -35,6 +35,25 @@ function toolLabel(tool: Tool): string {
   return toolLabels[tool];
 }
 
+function cellPositionKey(row: number, column: number): string {
+  return `${row}-${column}`;
+}
+
+function roomEdgeClasses(cell: CellDefinition, cellsByPosition: Map<string, CellDefinition>): string[] {
+  const room = cell.room ?? '';
+  const directions = [
+    ['n', -1, 0],
+    ['e', 0, 1],
+    ['s', 1, 0],
+    ['w', 0, -1]
+  ] as const;
+
+  return directions.flatMap(([edge, rowOffset, columnOffset]) => {
+    const neighbor = cellsByPosition.get(cellPositionKey(cell.row + rowOffset, cell.column + columnOffset));
+    return !neighbor || (neighbor.room ?? '') !== room ? [`room-edge-${edge}`] : [];
+  });
+}
+
 function firstSavedGame(progress: ProgressState): GameState {
   return progress.cases[cases[0].id]?.state ?? createInitialGameState(cases[0].id);
 }
@@ -47,6 +66,10 @@ export default function App() {
   const selectedSuspect = currentCase.suspects.find((suspect) => suspect.id === game.selectedSuspectId);
   const selectedPortrait = suspectPortraitFor(selectedSuspect);
   const completed = Boolean(progress.cases[currentCase.id]?.completed);
+  const cellsByPosition = useMemo(
+    () => new Map(currentCase.cells.map((cell) => [cellPositionKey(cell.row, cell.column), cell])),
+    [currentCase]
+  );
   const placedCount = useMemo(
     () => Object.values(game.board.placements).filter(Boolean).length,
     [game.board.placements]
@@ -143,6 +166,7 @@ export default function App() {
           const cellClass = [
             'board-cell',
             roomVisual.className,
+            ...roomEdgeClasses(cell, cellsByPosition),
             objectAsset ? 'has-object' : '',
             suspect ? 'occupied' : marked ? 'marked' : ''
           ]
