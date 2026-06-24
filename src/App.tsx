@@ -1,5 +1,5 @@
 import { type CSSProperties, useMemo, useState } from 'react';
-import { murdokuLogo, objectAssetFor, roomVisualFor } from './assets/murdokuAssets';
+import { murdokuLogo, objectAssetFor, roomVisualFor, suspectPortraitFor } from './assets/murdokuAssets';
 import { cases, casesById } from './data/cases';
 import { applyCellAction, createInitialGameState, selectSuspect, setTool, undo } from './game/board';
 import { loadProgress, saveProgress, type ProgressState } from './game/storage';
@@ -45,6 +45,7 @@ export default function App() {
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const currentCase = casesById[game.caseId] ?? cases[0];
   const selectedSuspect = currentCase.suspects.find((suspect) => suspect.id === game.selectedSuspectId);
+  const selectedPortrait = suspectPortraitFor(selectedSuspect);
   const completed = Boolean(progress.cases[currentCase.id]?.completed);
   const placedCount = useMemo(
     () => Object.values(game.board.placements).filter(Boolean).length,
@@ -157,6 +158,7 @@ export default function App() {
               style={{ '--accent': suspect?.accent } as CSSProperties}
               type="button"
             >
+              <img className="cell-terrain-art" src={roomVisual.textureAsset} alt="" aria-hidden="true" />
               <span className="cell-room">{roomName(cell.room)}</span>
               {objectAsset ? (
                 <img className="cell-object-art" src={objectAsset} alt={objectName(cell.object)} />
@@ -165,9 +167,7 @@ export default function App() {
               ) : null}
               {marked ? <span className="cell-mark">X</span> : null}
               {suspect ? (
-                <span className="cell-suspect" aria-hidden="true">
-                  {suspect.name.slice(0, 1)}
-                </span>
+                <img className="cell-suspect-photo" src={suspectPortraitFor(suspect)} alt="" aria-hidden="true" />
               ) : null}
             </button>
           );
@@ -176,9 +176,13 @@ export default function App() {
 
       <section className="clue-panel" aria-label={uiText.clues}>
         <div className="selected-row">
-          <div className="avatar" style={{ '--accent': selectedSuspect?.accent } as CSSProperties}>
-            {selectedSuspect ? selectedSuspect.name.slice(0, 1) : '?'}
-          </div>
+          {selectedPortrait ? (
+            <img className="avatar portrait-avatar" src={selectedPortrait} alt="" aria-hidden="true" />
+          ) : (
+            <div className="avatar" style={{ '--accent': selectedSuspect?.accent } as CSSProperties}>
+              ?
+            </div>
+          )}
           <div>
             <p className="eyebrow">{selectedSuspect ? uiText.selectedSuspect : uiText.noSuspectSelected}</p>
             <h2>{selectedSuspect?.name ?? uiText.chooseSuspect}</h2>
@@ -204,9 +208,7 @@ export default function App() {
               style={{ '--accent': suspect.accent } as CSSProperties}
               type="button"
             >
-              <span className="avatar" aria-hidden="true">
-                {suspect.name.slice(0, 1)}
-              </span>
+              <img className="avatar portrait-avatar" src={suspectPortraitFor(suspect)} alt="" aria-hidden="true" />
               <span>{suspect.name}</span>
               {isPlaced ? <span className="placed-dot" aria-label={uiText.placed} /> : null}
             </button>

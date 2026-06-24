@@ -32,10 +32,24 @@ describe('App', () => {
   });
 
   it('renders licensed reference assets when available', () => {
-    render(<App />);
+    const { container } = render(<App />);
 
     expect(screen.getByAltText('Murdoku')).toHaveAttribute('src', '/murdoku-assets/murdoku_logo_white.png');
     expect(screen.getByAltText('马')).toHaveAttribute('src', '/murdoku-assets/obj_horse.svg');
+    expect(container.querySelector('.cell-terrain-art')).toHaveAttribute('src', '/murdoku-assets/textures/room_desert.svg');
+  });
+
+  it('renders suspect portraits on the board after placement', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<App />);
+
+    await user.click(screen.getByRole('button', { name: /Aldous/i }));
+    await user.click(screen.getByRole('button', { name: /第 5 行第 6 列/i }));
+
+    expect(container.querySelector('.cell-suspect-photo')).toHaveAttribute(
+      'src',
+      '/murdoku-assets/portraits/case-01-a-aldous.svg'
+    );
   });
 
   it('closes the case when all suspects match the solution', async () => {

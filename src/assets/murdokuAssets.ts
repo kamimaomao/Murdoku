@@ -33,54 +33,13 @@ const objectAssets: Record<string, string> = {
   tv: 'obj_television.svg'
 };
 
-const roomVisuals: Record<string, string> = {
-  altar: 'room-path',
-  'back-yard': 'room-grass',
-  bank: 'room-wood',
-  bedroom: 'room-wood',
-  canyon: 'room-desert',
-  carpet: 'room-carpet',
-  chapel: 'room-path',
-  clearing: 'room-grass',
-  desert: 'room-desert',
-  'discussion-circle': 'room-path',
-  'east-court': 'room-path',
-  entrance: 'room-path',
-  'front-yard': 'room-grass',
-  'general-store': 'room-wood',
-  'grazing-pasture': 'room-grass',
-  kitchen: 'room-wood',
-  library: 'room-wood',
-  'living-room': 'room-wood',
-  outside: 'room-grass',
-  'pastor-s-house': 'room-wood',
-  path: 'room-path',
-  porch: 'room-path',
-  preparation: 'room-wood',
-  refreshments: 'room-wood',
-  restroom: 'room-wood',
-  sand: 'room-desert',
-  shack: 'room-wood',
-  stable: 'room-wood',
-  storage: 'room-wood',
-  'store-floor': 'room-wood',
-  tavern: 'room-wood',
-  'tent-a': 'room-canvas',
-  'tent-b': 'room-canvas',
-  'tent-c': 'room-canvas',
-  'the-barrels': 'room-wood',
-  'the-desert': 'room-desert',
-  'the-island': 'room-grass',
-  'tool-shed': 'room-wood',
-  'training-ring': 'room-grass',
-  walkway: 'room-path',
-  water: 'room-water',
-  'west-court': 'room-path',
-  woods: 'room-grass'
-};
-
 export interface RoomVisual {
   className: string;
+  textureAsset: string;
+}
+
+export interface PortraitSource {
+  portraitKey: string;
 }
 
 function normalizeObjectName(name: string): string {
@@ -94,6 +53,13 @@ export function objectAssetFor(objectName: string | undefined): string | undefin
 }
 
 export function roomVisualFor(roomName: string | undefined): RoomVisual {
-  if (!roomName) return { className: 'room-default' };
-  return { className: roomVisuals[normalizeObjectName(roomName)] ?? 'room-default' };
+  const slug = roomName ? normalizeObjectName(roomName) : 'default';
+  return {
+    className: `room-${slug}`,
+    textureAsset: `${assetRoot}textures/room_${slug}.svg`
+  };
+}
+
+export function suspectPortraitFor(suspect: PortraitSource | undefined): string | undefined {
+  return suspect ? `${assetRoot}portraits/${suspect.portraitKey}.svg` : undefined;
 }

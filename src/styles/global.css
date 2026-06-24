@@ -174,10 +174,10 @@ h2 {
   display: grid;
   min-width: 0;
   min-height: 0;
-  padding: 3px;
+  padding: 2px;
   border: 1px solid rgba(83, 58, 34, 0.34);
   border-radius: 4px;
-  background: var(--cell-base, #d9c38c);
+  background: #d9c38c;
   color: #3b281d;
   isolation: isolate;
   overflow: hidden;
@@ -187,81 +187,35 @@ h2 {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: 0;
-  background: var(--cell-pattern, linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(77, 52, 31, 0.08)));
-  opacity: 0.72;
+  z-index: 1;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(77, 52, 31, 0.14));
+  opacity: 0.52;
   pointer-events: none;
-}
-
-.room-default {
-  --cell-base: #d9c38c;
-}
-
-.room-desert {
-  --cell-base: #d7bd7d;
-  --cell-pattern:
-    radial-gradient(circle at 22% 28%, rgba(112, 80, 43, 0.2) 0 1px, transparent 2px),
-    radial-gradient(circle at 74% 67%, rgba(255, 237, 179, 0.42) 0 1px, transparent 2px);
-}
-
-.room-wood {
-  --cell-base: #c69b61;
-  --cell-pattern:
-    linear-gradient(90deg, rgba(66, 42, 26, 0.22) 0 1px, transparent 1px 33%),
-    linear-gradient(0deg, rgba(255, 237, 178, 0.18), rgba(84, 50, 28, 0.1));
-}
-
-.room-grass {
-  --cell-base: #b7c88b;
-  --cell-pattern:
-    linear-gradient(115deg, transparent 0 42%, rgba(69, 105, 61, 0.22) 43% 46%, transparent 47%),
-    radial-gradient(circle at 30% 70%, rgba(245, 230, 163, 0.24) 0 2px, transparent 3px);
-}
-
-.room-water {
-  --cell-base: #91b7bd;
-  --cell-pattern:
-    radial-gradient(ellipse at 32% 36%, rgba(255, 255, 255, 0.34) 0 14%, transparent 15%),
-    linear-gradient(145deg, rgba(49, 89, 99, 0.2), rgba(255, 255, 255, 0.14));
-}
-
-.room-path {
-  --cell-base: #b5a58d;
-  --cell-pattern:
-    radial-gradient(circle at 20% 28%, rgba(74, 65, 55, 0.2) 0 2px, transparent 3px),
-    radial-gradient(circle at 76% 68%, rgba(255, 244, 206, 0.32) 0 2px, transparent 3px);
-}
-
-.room-canvas {
-  --cell-base: #ceb586;
-  --cell-pattern:
-    linear-gradient(45deg, rgba(98, 65, 43, 0.16) 0 1px, transparent 1px 8px),
-    linear-gradient(-45deg, rgba(255, 244, 207, 0.2) 0 1px, transparent 1px 8px);
-}
-
-.room-carpet {
-  --cell-base: #b78372;
-  --cell-pattern:
-    linear-gradient(90deg, rgba(104, 35, 38, 0.22) 0 2px, transparent 2px 8px),
-    linear-gradient(0deg, rgba(247, 219, 165, 0.2) 0 2px, transparent 2px 8px);
 }
 
 .board-cell.occupied {
   outline: 2px solid var(--accent, var(--accent-2));
-  background:
-    linear-gradient(rgba(255, 244, 204, 0.6), rgba(255, 244, 204, 0.6)),
-    var(--cell-base, #f0e4bd);
 }
 
 .board-cell.marked {
   background: #8f8377;
 }
 
+.cell-terrain-art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
 .cell-room,
 .cell-object {
   display: block;
-  max-width: 100%;
-  color: rgba(40, 28, 21, 0.72);
+  max-width: calc(100% - 4px);
+  color: rgba(39, 27, 20, 0.92);
   font-size: 9px;
   font-weight: 800;
   line-height: 1.05;
@@ -269,11 +223,18 @@ h2 {
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
-  z-index: 1;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+  z-index: 3;
 }
 
-.board-cell.has-object .cell-room {
-  opacity: 0.12;
+.cell-room {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  padding: 1px 2px;
+  border: 1px solid rgba(86, 61, 41, 0.2);
+  border-radius: 3px;
+  background: rgba(247, 234, 198, 0.7);
 }
 
 .cell-object {
@@ -283,17 +244,18 @@ h2 {
 
 .cell-object-art {
   position: absolute;
-  inset: auto 50% 2px auto;
-  z-index: 1;
-  max-width: 74%;
-  max-height: 72%;
+  inset: 50% auto auto 50%;
+  z-index: 2;
+  width: 108%;
+  height: 108%;
+  max-width: none;
+  max-height: none;
   object-fit: contain;
   pointer-events: none;
   filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.38)) drop-shadow(0 2px 2px rgba(40, 28, 21, 0.26));
-  transform: translateX(50%);
+  transform: translate(-50%, -47%);
 }
 
-.cell-suspect,
 .cell-mark {
   position: absolute;
   inset: 50% auto auto 50%;
@@ -312,10 +274,26 @@ h2 {
   z-index: 2;
 }
 
+.cell-suspect-photo {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  z-index: 4;
+  width: 84%;
+  height: 92%;
+  border: 2px solid #fff2dc;
+  border-radius: 3px;
+  background: #fff2dc;
+  box-shadow: 0 2px 0 rgba(34, 24, 19, 0.72), 0 4px 8px rgba(29, 20, 15, 0.34);
+  object-fit: cover;
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(-4deg);
+}
+
 .cell-mark {
   border-color: rgba(255, 255, 255, 0.45);
   background: var(--danger);
   color: #260c0c;
+  z-index: 5;
 }
 
 .clue-panel {
@@ -335,11 +313,18 @@ h2 {
   width: 38px;
   height: 38px;
   border: 2px solid rgba(255, 255, 255, 0.7);
-  border-radius: 50%;
+  border-radius: 7px;
   background: var(--accent, #7aa783);
   color: #1f1712;
   font-weight: 900;
+  overflow: hidden;
   place-items: center;
+}
+
+.portrait-avatar {
+  display: block;
+  background: #fff2dc;
+  object-fit: cover;
 }
 
 .clue-panel ul {
@@ -371,6 +356,7 @@ h2 {
   width: 30px;
   height: 30px;
   border-width: 1px;
+  border-radius: 5px;
 }
 
 .suspect-token.active {
