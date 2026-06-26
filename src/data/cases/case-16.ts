@@ -53,7 +53,8 @@ const decorations: Record<string, Partial<CellDefinition>> = {
     "room": "Sea"
   },
   "2-1": {
-    "room": "Beach"
+    "room": "Beach",
+    "carpet": "7"
   },
   "2-2": {
     "room": "Beach"
@@ -74,7 +75,8 @@ const decorations: Record<string, Partial<CellDefinition>> = {
     "room": "Sea"
   },
   "3-1": {
-    "room": "Beach"
+    "room": "Beach",
+    "carpet": "43"
   },
   "3-2": {
     "room": "Beach"
@@ -108,10 +110,12 @@ const decorations: Record<string, Partial<CellDefinition>> = {
     "room": "Beach"
   },
   "4-5": {
-    "room": "Beach"
+    "room": "Beach",
+    "carpet": "1"
   },
   "4-6": {
-    "room": "Beach"
+    "room": "Beach",
+    "carpet": "13"
   },
   "5-0": {
     "room": "Sea",
@@ -124,10 +128,12 @@ const decorations: Record<string, Partial<CellDefinition>> = {
     "room": "Sea"
   },
   "5-3": {
-    "room": "Beach"
+    "room": "Beach",
+    "carpet": "1"
   },
   "5-4": {
-    "room": "Beach"
+    "room": "Beach",
+    "carpet": "13"
   },
   "5-5": {
     "room": "Beach"

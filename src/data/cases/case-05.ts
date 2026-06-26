@@ -81,11 +81,13 @@ const decorations: Record<string, Partial<CellDefinition>> = {
   },
   "2-6": {
     "room": "Tent A",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "1"
   },
   "2-7": {
     "room": "Tent A",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "13"
   },
   "2-8": {
     "room": "Tent A"
@@ -218,7 +220,8 @@ const decorations: Record<string, Partial<CellDefinition>> = {
   },
   "7-2": {
     "room": "Tent B",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "7"
   },
   "7-3": {
     "room": "Woods",
@@ -242,15 +245,18 @@ const decorations: Record<string, Partial<CellDefinition>> = {
   },
   "8-0": {
     "room": "Tent B",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "1"
   },
   "8-1": {
     "room": "Tent B",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "47"
   },
   "8-2": {
     "room": "Tent B",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "48"
   },
   "8-3": {
     "room": "Woods"
@@ -261,15 +267,18 @@ const decorations: Record<string, Partial<CellDefinition>> = {
   },
   "8-5": {
     "room": "Tent C",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "1"
   },
   "8-6": {
     "room": "Tent C",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "47"
   },
   "8-7": {
     "room": "Tent C",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "13"
   },
   "8-8": {
     "room": "Tent C",

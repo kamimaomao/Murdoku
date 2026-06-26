@@ -16,6 +16,7 @@ export interface CellDefinition {
   column: number;
   room?: string;
   object?: string;
+  carpet?: string;
   blocked?: boolean;
 }
 

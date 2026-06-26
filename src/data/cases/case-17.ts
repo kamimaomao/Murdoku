@@ -36,16 +36,20 @@ const decorations: Record<string, Partial<CellDefinition>> = {
     "object": "Table"
   },
   "1-1": {
-    "room": "Kitchen"
+    "room": "Kitchen",
+    "carpet": "24"
   },
   "1-2": {
-    "room": "Kitchen"
+    "room": "Kitchen",
+    "carpet": "3"
   },
   "1-3": {
-    "room": "Kitchen"
+    "room": "Kitchen",
+    "carpet": "3"
   },
   "1-4": {
-    "room": "Kitchen"
+    "room": "Kitchen",
+    "carpet": "20"
   },
   "1-5": {
     "room": "Kitchen",
@@ -62,16 +66,20 @@ const decorations: Record<string, Partial<CellDefinition>> = {
     "room": "Kitchen"
   },
   "2-1": {
-    "room": "Kitchen"
+    "room": "Kitchen",
+    "carpet": "44"
   },
   "2-2": {
-    "room": "Kitchen"
+    "room": "Kitchen",
+    "carpet": "29"
   },
   "2-3": {
-    "room": "Kitchen"
+    "room": "Kitchen",
+    "carpet": "29"
   },
   "2-4": {
-    "room": "Kitchen"
+    "room": "Kitchen",
+    "carpet": "40"
   },
   "2-5": {
     "room": "Kitchen"
@@ -194,13 +202,16 @@ const decorations: Record<string, Partial<CellDefinition>> = {
     "room": "Dining Room"
   },
   "6-7": {
-    "room": "Dining Room"
+    "room": "Dining Room",
+    "carpet": "7"
   },
   "7-0": {
-    "room": "Reception"
+    "room": "Reception",
+    "carpet": "1"
   },
   "7-1": {
-    "room": "Reception"
+    "room": "Reception",
+    "carpet": "13"
   },
   "7-2": {
     "room": "Reception"
@@ -221,7 +232,8 @@ const decorations: Record<string, Partial<CellDefinition>> = {
     "object": "Chair"
   },
   "7-7": {
-    "room": "Dining Room"
+    "room": "Dining Room",
+    "carpet": "43"
   }
 };
 

@@ -14,15 +14,18 @@ const decorations: Record<string, Partial<CellDefinition>> = {
   },
   "0-3": {
     "room": "Altar",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "24"
   },
   "0-4": {
     "room": "Altar",
-    "object": "Table / Carpet"
+    "object": "Table / Carpet",
+    "carpet": "3"
   },
   "0-5": {
     "room": "Altar",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "20"
   },
   "0-6": {
     "room": "Chapel"
@@ -46,15 +49,18 @@ const decorations: Record<string, Partial<CellDefinition>> = {
   },
   "1-3": {
     "room": "Altar",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "44"
   },
   "1-4": {
     "room": "Altar",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "29"
   },
   "1-5": {
     "room": "Altar",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "40"
   },
   "1-6": {
     "room": "Chapel"
@@ -79,7 +85,8 @@ const decorations: Record<string, Partial<CellDefinition>> = {
   },
   "2-4": {
     "room": "Chapel",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "7"
   },
   "2-5": {
     "room": "Chapel",
@@ -110,7 +117,8 @@ const decorations: Record<string, Partial<CellDefinition>> = {
   },
   "3-4": {
     "room": "Chapel",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "41"
   },
   "3-5": {
     "room": "Chapel",
@@ -142,7 +150,8 @@ const decorations: Record<string, Partial<CellDefinition>> = {
   },
   "4-4": {
     "room": "Chapel",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "41"
   },
   "4-5": {
     "room": "Chapel",
@@ -174,7 +183,8 @@ const decorations: Record<string, Partial<CellDefinition>> = {
   },
   "5-4": {
     "room": "Chapel",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "41"
   },
   "5-5": {
     "room": "Chapel"
@@ -204,7 +214,8 @@ const decorations: Record<string, Partial<CellDefinition>> = {
   },
   "6-4": {
     "room": "Chapel",
-    "object": "Carpet"
+    "object": "Carpet",
+    "carpet": "43"
   },
   "6-5": {
     "room": "Chapel",

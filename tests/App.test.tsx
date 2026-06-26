@@ -166,6 +166,19 @@ describe('App', () => {
     expect(within(objectCell).queryByText('沙漠')).not.toBeInTheDocument();
   });
 
+  it('renders the Surprise Visitors reference carpet scene layer', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<App />);
+
+    await user.click(screen.getByRole('button', { name: /19中等/i }));
+
+    const carpetTiles = Array.from(container.querySelectorAll('.cell-carpet'));
+    expect(carpetTiles).toHaveLength(16);
+    expect(carpetTiles.map((tile) => tile.getAttribute('data-carpet-frame'))).toEqual(
+      expect.arrayContaining(['24', '3', '20', '44', '29', '40'])
+    );
+  });
+
   it('renders suspect portraits on the board after placement', async () => {
     const user = userEvent.setup();
     const { container } = render(<App />);

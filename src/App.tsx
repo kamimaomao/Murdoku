@@ -262,6 +262,7 @@ export default function App() {
             roomVisual.className,
             ...roomEdgeClasses(cell, cellsByPosition),
             revealedCellId === cell.id ? 'labels-revealed' : '',
+            cell.carpet ? 'has-carpet' : '',
             objectAsset ? 'has-object' : '',
             suspect?.id === selectedSuspect?.id ? 'selected-suspect' : '',
             suspect ? 'occupied' : marked ? 'marked' : ''
@@ -285,6 +286,13 @@ export default function App() {
               type="button"
             >
               <img className="cell-terrain-art" src={roomVisual.textureAsset} alt="" aria-hidden="true" />
+              {cell.carpet ? (
+                <span
+                  aria-hidden="true"
+                  className={`cell-carpet carpet-frame-${cell.carpet}`}
+                  data-carpet-frame={cell.carpet}
+                />
+              ) : null}
               {cell.object ? (
                 <span className="cell-object">{objectName(cell.object)}</span>
               ) : (
