@@ -273,6 +273,8 @@ describe('App', () => {
     const result = screen.getByRole('status');
     const murderer = firstCase.suspects.find((suspect) => suspect.id === firstCase.murdererId);
     expect(result).toHaveTextContent(/案件已结/i);
+    expect(result).toHaveTextContent('关键人物是');
+    expect(result).not.toHaveTextContent('凶手是');
     expect(within(result).getByText(new RegExp(murderer!.name, 'i'))).toBeInTheDocument();
   });
 

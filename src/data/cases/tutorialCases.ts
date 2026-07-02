@@ -59,6 +59,7 @@ function buildCase(config: TutorialCaseConfig): CaseDefinition {
     difficulty: config.difficulty,
     size: { rows: config.size, columns: config.size },
     intro: config.intro,
+    culpritLabel: '关键人物',
     victimId: suspects[suspects.length - 1].id,
     murdererId: suspects[Math.min(2, suspects.length - 2)].id,
     cells,
@@ -146,7 +147,7 @@ export const tutorialCases: CaseDefinition[] = [
     difficulty: 'medium',
     size: 6,
     intro:
-      'This case introduces the outlaw: the outlaw is a special identity, and they may or may not be the murderer.',
+      'This case introduces the outlaw: the outlaw is a special identity, and they may or may not be the key person.',
     source: case05,
     rooms: ['Stable', 'Training Ring', 'Grazing Pasture', 'Tool Shed'],
     objects: {

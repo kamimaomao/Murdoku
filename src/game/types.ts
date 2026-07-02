@@ -39,6 +39,7 @@ export interface CaseDefinition {
   difficulty: Difficulty;
   size: GridSize;
   intro: string;
+  culpritLabel?: string;
   victimId: SuspectId;
   murdererId: SuspectId;
   cells: CellDefinition[];

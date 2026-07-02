@@ -47,7 +47,7 @@ describe('case data', () => {
   it('keeps the first five teaching cases before switching to original puzzles', () => {
     expect(cases.slice(0, 4).map((caseDef) => caseDef.intro).join(' ')).not.toMatch(/outlaw/i);
     expect(cases[4].intro).toMatch(/outlaw/i);
-    expect(cases[4].intro).toMatch(/may or may not be the murderer/i);
+    expect(cases[4].intro).not.toMatch(/murderer|victim/i);
     expect(cases.slice(5).map((caseDef) => caseDef.title)).toEqual([
       'A Horse With No Name',
       'Frontier Town',
@@ -65,6 +65,20 @@ describe('case data', () => {
       'Surprise Visitors',
       'The Abandoned Museum'
     ]);
+  });
+
+  it('keeps tutorial cases framed as practice scenes instead of fatal cases', () => {
+    const fatalWords = /凶手|受害者|被害人|命案|遇害|死亡|murderer|victim/i;
+
+    for (const caseDef of cases.slice(0, 5)) {
+      const visibleText = [
+        caseIntro(caseDef),
+        ...caseDef.suspects.flatMap((suspect) => suspectClues(caseDef.id, suspect))
+      ].join(' ');
+
+      expect(visibleText, caseDef.id).not.toMatch(fatalWords);
+      expect(caseDef.culpritLabel, caseDef.id).toBe('关键人物');
+    }
   });
 
   it('translates object cell clues as being in that object cell instead of beside it', () => {

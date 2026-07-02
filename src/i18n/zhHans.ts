@@ -194,7 +194,7 @@ const cases: Record<string, { title: string; intro: string; clues: Record<string
   },
   'case-05': {
     title: '马厩疑云',
-    intro: '本关首次引入法外之徒：法外之徒是一名特殊身份的人；他可能是凶手，也可能不是。线索会告诉你法外之徒相关条件。',
+    intro: '本关首次引入法外之徒：法外之徒是一名特殊身份的人；他可能是关键人物，也可能不是。线索会告诉你法外之徒相关条件。',
     clues: {
       'a-alicia': ['她在灌木格。'],
       'b-brenda': ['她在第 6 列。'],

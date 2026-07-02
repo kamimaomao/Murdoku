@@ -178,7 +178,8 @@ export default function App() {
   function issueText(result: ValidationResult): string {
     if (result.solved) {
       const murderer = currentCase.suspects.find((suspect) => suspect.id === currentCase.murdererId)?.name;
-      return `${uiText.caseClosed}${uiText.murdererPrefix} ${murderer}。`;
+      const culpritPrefix = currentCase.culpritLabel ? `${currentCase.culpritLabel}是` : uiText.murdererPrefix;
+      return `${uiText.caseClosed}${culpritPrefix} ${murderer}。`;
     }
     return zhIssueText(result.issues[0]);
   }
