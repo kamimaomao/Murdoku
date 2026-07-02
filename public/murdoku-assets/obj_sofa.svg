@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="sofaBack" x1="0" y1="9" x2="0" y2="49" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f0a38e"/>
+      <stop offset=".56" stop-color="#c85d73"/>
+      <stop offset="1" stop-color="#8d394e"/>
+    </linearGradient>
+    <linearGradient id="sofaSeat" x1="0" y1="31" x2="0" y2="54" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f6b5a0"/>
+      <stop offset=".58" stop-color="#cf6177"/>
+      <stop offset="1" stop-color="#7c3345"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="32" cy="56" rx="27" ry="6" fill="#1b1512" opacity=".28"/>
+  <path d="M10 26c0-10 8-17 22-17s22 7 22 17v24H10z" fill="#15100e"/>
+  <path d="M14 27c0-8 7-13 18-13s18 5 18 13v19H14z" fill="url(#sofaBack)"/>
+  <path d="M8 30c-4 1-7 5-7 11 0 8 6 12 13 10V32zM56 30c4 1 7 5 7 11 0 8-6 12-13 10V32z" fill="#15100e"/>
+  <path d="M11 34c-3 1-5 4-5 8 0 5 4 7 8 5V34zM53 34c3 1 5 4 5 8 0 5-4 7-8 5V34z" fill="#a14358"/>
+  <path d="M14 37c4-4 32-4 36 0 5 5 4 13-2 17H16c-6-4-7-12-2-17z" fill="#15100e"/>
+  <path d="M17 39c4-3 26-3 30 0 4 4 3 9-2 11H19c-5-2-6-7-2-11z" fill="url(#sofaSeat)"/>
+  <path d="M21 38v12M32 37v13M43 38v12" stroke="#6f2d3e" stroke-width="2" stroke-linecap="round" opacity=".7"/>
+  <path d="M18 29c7 4 21 5 28 0" fill="none" stroke="#ffd1bc" stroke-width="3" stroke-linecap="round" opacity=".72"/>
+  <path d="M17 35c8 3 22 3 30 0" fill="none" stroke="#6c2b3b" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+  <path d="M19 43c7 2 18 2 26 0" fill="none" stroke="#fac0ae" stroke-width="2" stroke-linecap="round" opacity=".72"/>
+  <path d="M17 19c4-4 10-6 17-5M37 15c6 1 10 3 13 7" fill="none" stroke="#ffe0cf" stroke-width="2" stroke-linecap="round" opacity=".55"/>
+  <path d="M14 48c5 4 31 4 36 0" fill="none" stroke="#4b202d" stroke-width="2" stroke-linecap="round" opacity=".65"/>
+  <path d="M15 50h6v8h-6zM43 50h6v8h-6z" fill="#15100e"/>
+  <path d="M16 50h4v6h-4zM44 50h4v6h-4z" fill="#704132"/>
+  <path d="M9 41c2 2 4 2 6 0M49 41c2 2 4 2 6 0" stroke="#fac0ae" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+</svg>

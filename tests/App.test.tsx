@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import App from '../src/App';
@@ -8,6 +8,11 @@ describe('App', () => {
   beforeEach(() => {
     localStorage.clear();
   });
+
+  async function chooseCase(user: ReturnType<typeof userEvent.setup>, caseNumber: number) {
+    await user.click(screen.getByRole('button', { name: /选择关卡/i }));
+    await user.click(screen.getByRole('button', { name: new RegExp(`选择第 ${caseNumber} 关`, 'i') }));
+  }
 
   it('places, marks, and erases cells with the mobile controls', async () => {
     const user = userEvent.setup();
@@ -101,21 +106,39 @@ describe('App', () => {
     expect(screen.getByRole('status')).toHaveTextContent(/答案已显示/i);
   });
 
-  it('moves a placed suspect by dragging from one board cell to another', async () => {
+  it('moves a placed suspect with a touch-first tap sequence', async () => {
     const user = userEvent.setup();
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: /Aldous/i }));
     await user.click(screen.getByRole('button', { name: /^第 4 行第 4 列$/i }));
+    await user.click(screen.getByRole('button', { name: /Blanche/i }));
 
     const source = screen.getByRole('button', { name: /第 4 行第 4 列.*Aldous/i });
     const target = screen.getByRole('button', { name: /^第 1 行第 1 列$/i });
 
-    fireEvent.pointerDown(source, { clientX: 120, clientY: 120 });
-    fireEvent.pointerUp(target, { clientX: 20, clientY: 20 });
+    await user.click(source);
+    expect(source).toHaveClass('move-source');
+    await user.click(target);
 
     expect(screen.getByRole('button', { name: /第 1 行第 1 列.*Aldous/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^第 4 行第 4 列$/i })).toBeInTheDocument();
+  });
+
+  it('opens cases through a mobile level picker instead of a persistent case strip', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    expect(screen.queryByRole('dialog', { name: '选择关卡' })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /选择关卡.*关卡 1/i }));
+
+    expect(screen.getByRole('dialog', { name: '选择关卡' })).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /选择第 6 关/i }));
+
+    expect(screen.getByRole('heading', { name: '无名之马' })).toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: '选择关卡' })).not.toBeInTheDocument();
   });
 
   it('renders licensed reference assets when available', () => {
@@ -170,13 +193,24 @@ describe('App', () => {
     const user = userEvent.setup();
     const { container } = render(<App />);
 
-    await user.click(screen.getByRole('button', { name: /19中等/i }));
+    await chooseCase(user, 19);
 
     const carpetTiles = Array.from(container.querySelectorAll('.cell-carpet'));
     expect(carpetTiles).toHaveLength(16);
     expect(carpetTiles.map((tile) => tile.getAttribute('data-carpet-frame'))).toEqual(
       expect.arrayContaining(['24', '3', '20', '44', '29', '40'])
     );
+  });
+
+  it('renders large room labels for indoor scene boards', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<App />);
+
+    await chooseCase(user, 19);
+
+    const labels = Array.from(container.querySelectorAll('.scene-room-label')).map((label) => label.textContent);
+    expect(labels).toEqual(expect.arrayContaining(['客房', '客厅', '主卧室', '浴室', '餐厅', '厨房']));
+    expect(container.querySelectorAll('.board-cell.labels-revealed')).toHaveLength(0);
   });
 
   it('renders suspect portraits on the board after placement', async () => {
@@ -211,7 +245,7 @@ describe('App', () => {
     const user = userEvent.setup();
     const { container } = render(<App />);
 
-    await user.click(screen.getByRole('button', { name: /20困难/i }));
+    await chooseCase(user, 20);
     await user.click(screen.getByRole('button', { name: /答案/i }));
 
     const portraitVariants = Array.from(container.querySelectorAll('.cell-suspect-photo')).map((photo) =>

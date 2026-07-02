@@ -1,4 +1,4 @@
-import { type CSSProperties, type DragEvent, type PointerEvent, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, type PointerEvent, useMemo, useRef, useState } from 'react';
 import { murdokuLogo, objectAssetFor, roomVisualFor, suspectPortraitFor } from './assets/murdokuAssets';
 import { cases, casesById } from './data/cases';
 import {
@@ -12,7 +12,7 @@ import {
   undo
 } from './game/board';
 import { loadProgress, saveProgress, type ProgressState } from './game/storage';
-import type { BoardState, CaseDefinition, CellDefinition, GameState, Suspect, Tool, ValidationResult } from './game/types';
+import type { BoardState, CaseDefinition, CellDefinition, CellId, GameState, Suspect, Tool, ValidationResult } from './game/types';
 import { validateBoard } from './game/validation';
 import {
   caseIntro,
@@ -69,8 +69,36 @@ function roomEdgeClasses(cell: CellDefinition, cellsByPosition: Map<string, Cell
   });
 }
 
+const labeledSceneRooms = new Set(['Bathroom', 'Dining Room', 'Guest Bedroom', 'Kitchen', 'Living Room', 'Main Bedroom']);
+
+function sceneRoomLabels(caseDef: CaseDefinition) {
+  const rooms = new Map<string, CellDefinition[]>();
+  for (const cell of caseDef.cells) {
+    if (!cell.room || !labeledSceneRooms.has(cell.room)) continue;
+    rooms.set(cell.room, [...(rooms.get(cell.room) ?? []), cell]);
+  }
+
+  return Array.from(rooms.entries()).map(([room, cells]) => {
+    const rows = cells.map((cell) => cell.row);
+    const columns = cells.map((cell) => cell.column);
+    const minColumn = Math.min(...columns);
+    const maxColumn = Math.max(...columns);
+    const maxRow = Math.max(...rows);
+    return {
+      room,
+      left: `${(((minColumn + maxColumn + 1) / 2) * 100) / caseDef.size.columns}%`,
+      top: `${Math.min(94, ((maxRow + 0.7) * 100) / caseDef.size.rows)}%`
+    };
+  });
+}
+
 function firstSavedGame(progress: ProgressState): GameState {
   return progress.cases[cases[0].id]?.state ?? createInitialGameState(cases[0].id);
+}
+
+function cellIdFromPoint(clientX: number, clientY: number): CellId | undefined {
+  const element = document.elementFromPoint(clientX, clientY)?.closest<HTMLElement>('.board-cell');
+  return element?.dataset.cellId as CellId | undefined;
 }
 
 interface DragIntent {
@@ -86,9 +114,12 @@ export default function App() {
   const [validation, setValidation] = useState<ValidationResult | null>(null);
   const [revealedCellId, setRevealedCellId] = useState<CellDefinition['id'] | undefined>();
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [casePickerOpen, setCasePickerOpen] = useState(false);
+  const [moveSourceCellId, setMoveSourceCellId] = useState<CellDefinition['id'] | undefined>();
   const dragIntentRef = useRef<DragIntent | null>(null);
   const skipNextClickRef = useRef(false);
   const currentCase = casesById[game.caseId] ?? cases[0];
+  const currentCaseIndex = Math.max(0, cases.findIndex((caseDef) => caseDef.id === currentCase.id));
   const selectedSuspect = currentCase.suspects.find((suspect) => suspect.id === game.selectedSuspectId);
   const selectedPortrait = suspectPortraitFor(selectedSuspect);
   const completed = Boolean(progress.cases[currentCase.id]?.completed);
@@ -96,6 +127,7 @@ export default function App() {
     () => new Map(currentCase.cells.map((cell) => [cellPositionKey(cell.row, cell.column), cell])),
     [currentCase]
   );
+  const roomLabels = useMemo(() => sceneRoomLabels(currentCase), [currentCase]);
   const placedCount = useMemo(
     () => Object.values(game.board.placements).filter(Boolean).length,
     [game.board.placements]
@@ -133,6 +165,8 @@ export default function App() {
     setValidation(null);
     setRevealedCellId(undefined);
     setStatusMessage(null);
+    setMoveSourceCellId(undefined);
+    setCasePickerOpen(false);
   }
 
   function submitAccusation() {
@@ -155,15 +189,34 @@ export default function App() {
       return;
     }
     setRevealedCellId(cellId);
-    if (game.activeTool === 'place' && suspect && suspect.id !== game.selectedSuspectId) {
-      updateGame(selectSuspect(game, suspect.id), false);
+
+    if (game.activeTool !== 'place') {
+      setMoveSourceCellId(undefined);
+      updateGame(applyCellAction(game, cellId));
       return;
     }
+
+    if (game.activeTool === 'place' && suspect && suspect.id !== game.selectedSuspectId) {
+      setMoveSourceCellId(cellId);
+      updateGame(selectSuspect(game, suspect.id), false);
+      setStatusMessage(`${suspect.name}${uiText.moveHint}`);
+      return;
+    }
+
+    if (!suspect && moveSourceCellId && selectedSuspect) {
+      setMoveSourceCellId(undefined);
+      updateGame(moveSuspect(game, selectedSuspect.id, cellId));
+      setStatusMessage(`${selectedSuspect.name}${uiText.moved}`);
+      return;
+    }
+
+    setMoveSourceCellId(undefined);
     updateGame(applyCellAction(game, cellId));
   }
 
   function handleCellPointerDown(event: PointerEvent<HTMLButtonElement>, cellId: CellDefinition['id'], suspect: Suspect | undefined) {
-    if (!suspect) return;
+    if (!suspect || game.activeTool !== 'place') return;
+    event.currentTarget.setPointerCapture?.(event.pointerId);
     dragIntentRef.current = {
       suspectId: suspect.id,
       sourceCellId: cellId,
@@ -175,28 +228,23 @@ export default function App() {
   function handleCellPointerUp(event: PointerEvent<HTMLButtonElement>, cellId: CellDefinition['id']) {
     const intent = dragIntentRef.current;
     dragIntentRef.current = null;
-    if (!intent || intent.sourceCellId === cellId) return;
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+      event.currentTarget.releasePointerCapture?.(event.pointerId);
+    }
+    if (!intent) return;
 
     const movedEnough = Math.hypot(event.clientX - intent.startX, event.clientY - intent.startY) > 8;
     if (!movedEnough) return;
 
+    const targetCellId = cellIdFromPoint(event.clientX, event.clientY) ?? cellId;
+    if (!targetCellId || targetCellId === intent.sourceCellId) return;
+
     skipNextClickRef.current = true;
-    setRevealedCellId(cellId);
-    updateGame(moveSuspect(game, intent.suspectId, cellId));
-  }
-
-  function handleCellDragStart(event: DragEvent<HTMLButtonElement>, suspect: Suspect | undefined) {
-    if (!suspect) return;
-    event.dataTransfer.effectAllowed = 'move';
-    event.dataTransfer.setData('text/plain', suspect.id);
-  }
-
-  function handleCellDrop(event: DragEvent<HTMLButtonElement>, cellId: CellDefinition['id']) {
-    event.preventDefault();
-    const suspectId = event.dataTransfer.getData('text/plain');
-    if (!suspectId || !currentCase.suspects.some((suspect) => suspect.id === suspectId)) return;
-    setRevealedCellId(cellId);
-    updateGame(moveSuspect(game, suspectId, cellId));
+    setMoveSourceCellId(undefined);
+    setRevealedCellId(targetCellId);
+    updateGame(moveSuspect(game, intent.suspectId, targetCellId));
+    const movedSuspect = currentCase.suspects.find((suspect) => suspect.id === intent.suspectId);
+    setStatusMessage(movedSuspect ? `${movedSuspect.name}${uiText.moved}` : null);
   }
 
   function confirmSelectedPosition() {
@@ -211,6 +259,7 @@ export default function App() {
   function showAnswer() {
     updateGame(applyAnswer(currentCase, game));
     setStatusMessage(uiText.answerRevealed);
+    setMoveSourceCellId(undefined);
   }
 
   return (
@@ -220,27 +269,55 @@ export default function App() {
           <img className="brand-logo" src={murdokuLogo} alt="Murdoku" />
           <h1>{caseTitle(currentCase)}</h1>
         </div>
-        <div className="case-meta" aria-label={uiText.caseProgress}>
-          <span>{difficultyLabels[currentCase.difficulty]}</span>
-          <span>
+        <button
+          aria-label={`${uiText.casePicker}，${uiText.openCases} ${currentCaseIndex + 1}，${difficultyLabels[currentCase.difficulty]}，${placedCount}/${currentCase.suspects.length}`}
+          className="case-meta case-select-button"
+          onClick={() => setCasePickerOpen(true)}
+          type="button"
+        >
+          <span>{`${uiText.openCases} ${currentCaseIndex + 1}`}</span>
+          <small>
+            {progress.cases[currentCase.id]?.completed ? uiText.closed : difficultyLabels[currentCase.difficulty]}
+          </small>
+          <strong>
             {placedCount}/{currentCase.suspects.length}
-          </span>
-        </div>
+          </strong>
+        </button>
       </header>
 
-      <section className="case-strip" aria-label={uiText.cases}>
-        {cases.map((caseDef, index) => (
-          <button
-            className={caseDef.id === currentCase.id ? 'case-chip active' : 'case-chip'}
-            key={caseDef.id}
-            onClick={() => chooseCase(caseDef.id)}
-            type="button"
-          >
-            <span>{index + 1}</span>
-            {progress.cases[caseDef.id]?.completed ? uiText.closed : difficultyLabels[caseDef.difficulty]}
-          </button>
-        ))}
-      </section>
+      {casePickerOpen ? (
+        <section className="case-picker" role="dialog" aria-modal="true" aria-label={uiText.casePicker}>
+          <button className="case-picker-backdrop" aria-label={uiText.close} onClick={() => setCasePickerOpen(false)} type="button" />
+          <div className="case-picker-panel">
+            <div className="case-picker-header">
+              <h2>{uiText.casePicker}</h2>
+              <button className="case-picker-close" onClick={() => setCasePickerOpen(false)} type="button">
+                {uiText.close}
+              </button>
+            </div>
+            <div className="case-grid">
+              {cases.map((caseDef, index) => {
+                const isActive = caseDef.id === currentCase.id;
+                const isClosed = progress.cases[caseDef.id]?.completed;
+
+                return (
+                  <button
+                    aria-label={`选择第 ${index + 1} 关 ${caseTitle(caseDef)} ${isClosed ? uiText.closed : difficultyLabels[caseDef.difficulty]}`}
+                    className={isActive ? 'case-grid-item active' : 'case-grid-item'}
+                    key={caseDef.id}
+                    onClick={() => chooseCase(caseDef.id)}
+                    type="button"
+                  >
+                    <span>{index + 1}</span>
+                    <strong>{caseTitle(caseDef)}</strong>
+                    <small>{isClosed ? uiText.closed : difficultyLabels[caseDef.difficulty]}</small>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       <section className="briefing" aria-label={uiText.briefing}>
         <p className="rule-note">{uiText.coreRule}</p>
@@ -262,6 +339,7 @@ export default function App() {
             roomVisual.className,
             ...roomEdgeClasses(cell, cellsByPosition),
             revealedCellId === cell.id ? 'labels-revealed' : '',
+            moveSourceCellId === cell.id ? 'move-source' : '',
             cell.carpet ? 'has-carpet' : '',
             objectAsset ? 'has-object' : '',
             suspect?.id === selectedSuspect?.id ? 'selected-suspect' : '',
@@ -274,12 +352,9 @@ export default function App() {
             <button
               aria-label={cellLabel(cell, suspect, marked)}
               className={cellClass}
-              draggable={Boolean(suspect)}
+              data-cell-id={cell.id}
               key={cell.id}
               onClick={() => handleCellClick(cell.id, suspect)}
-              onDragOver={(event) => event.preventDefault()}
-              onDragStart={(event) => handleCellDragStart(event, suspect)}
-              onDrop={(event) => handleCellDrop(event, cell.id)}
               onPointerDown={(event) => handleCellPointerDown(event, cell.id, suspect)}
               onPointerUp={(event) => handleCellPointerUp(event, cell.id)}
               style={{ '--accent': suspect?.accent } as CSSProperties}
@@ -313,6 +388,16 @@ export default function App() {
             </button>
           );
         })}
+        {roomLabels.map((label) => (
+          <span
+            aria-hidden="true"
+            className="scene-room-label"
+            key={label.room}
+            style={{ left: label.left, top: label.top } as CSSProperties}
+          >
+            {roomName(label.room)}
+          </span>
+        ))}
       </section>
 
       <section className="clue-panel" aria-label={uiText.clues}>
@@ -350,7 +435,10 @@ export default function App() {
             <button
               className={isSelected ? 'suspect-token active' : 'suspect-token'}
               key={suspect.id}
-              onClick={() => updateGame(selectSuspect(game, suspect.id), false)}
+              onClick={() => {
+                setMoveSourceCellId(undefined);
+                updateGame(selectSuspect(game, suspect.id), false);
+              }}
               style={{ '--accent': suspect.accent } as CSSProperties}
               type="button"
             >
